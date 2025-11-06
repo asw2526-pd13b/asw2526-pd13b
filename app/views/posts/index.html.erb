@@ -1,0 +1,25 @@
+<h1>Posts</h1>
+
+<p><%= link_to "Create Post", new_post_path %></p>
+
+<% if @posts.any? %>
+  <ul>
+    <% @posts.each do |post| %>
+      <li style="margin-bottom: 1rem;">
+        <div>
+          <strong><%= link_to post.title, post.url, target: "_blank", rel: "noopener" %></strong>
+          <span>— <%= post.community %></span>
+        </div>
+        <div style="font-size: 0.9rem; color: #555;">
+          by <%= post.user.display_name %> (@<%= post.user.username %>) ·
+          <%= time_ago_in_words(post.created_at) %> ago
+        </div>
+        <% if post.body.present? %>
+          <p><%= simple_format(post.body) %></p>
+        <% end %>
+      </li>
+    <% end %>
+  </ul>
+<% else %>
+  <p>No hay posts todavía.</p>
+<% end %>
