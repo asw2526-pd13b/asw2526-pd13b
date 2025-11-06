@@ -1,0 +1,25 @@
+<h1>Communities</h1>
+<p><%= link_to "New Community", new_community_path %></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th># Subscriptors</th>
+      <th># Publicacions</th>
+      <th># Comentaris</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @communities.each do |c| %>
+      <tr>
+        <td><%= link_to (c.name.presence || c.slug), community_path(c) %></td>
+        <td>0</td> <!-- se implementará con subscripciones -->
+        <td><%= c.posts.count %></td>
+        <td><%= Comment.joins(:post).where(posts: { community_id: c.id }).count rescue 0 %></td>
+        <td><%= link_to "Edit", edit_community_path(c) %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

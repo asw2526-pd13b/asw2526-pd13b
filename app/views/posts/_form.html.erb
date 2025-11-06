@@ -3,17 +3,12 @@
     <div id="error_explanation">
       <h2><%= pluralize(post.errors.count, "error") %> impidieron guardar el post:</h2>
       <ul>
-      <% post.errors.full_messages.each do |message| %>
-        <li><%= message %></li>
-      <% end %>
+        <% post.errors.full_messages.each do |message| %>
+          <li><%= message %></li>
+        <% end %>
       </ul>
     </div>
   <% end %>
-
-  <div>
-    <%= form.label :url, "External URL" %><br>
-    <%= form.text_field :url, required: true, placeholder: "https://..." %>
-  </div>
 
   <div>
     <%= form.label :title, "Title" %><br>
@@ -21,13 +16,18 @@
   </div>
 
   <div>
-    <%= form.label :body, "Body (optional)" %><br>
-    <%= form.text_area :body, rows: 5 %>
+    <%= form.label :url, "External URL" %><br>
+    <%= form.text_field :url, required: true, placeholder: "https://..." %>
   </div>
 
   <div>
-    <%= form.label :community, "Community (hardcoded por ahora)" %><br>
-    <%= form.text_field :community, value: post.community.presence || "programming" %>
+    <%= form.label :body, "Body (optional)" %><br>
+    <%= form.text_area :body, rows: 6 %>
+  </div>
+
+  <div>
+    <%= form.label :community_id, "Community" %><br>
+    <%= form.collection_select :community_id, @communities, :id, :slug, prompt: "Select a community" %>
   </div>
 
   <div style="margin-top: 1rem;">

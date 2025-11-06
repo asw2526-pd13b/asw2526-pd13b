@@ -1,0 +1,24 @@
+<h1><%= @community.name.presence || @community.slug %></h1>
+<p><strong>id:</strong> <%= @community.slug %></p>
+
+<% if @community.banner.attached? %>
+  <div><%= image_tag @community.banner, style: "max-width:100%;height:auto;" %></div>
+<% end %>
+
+<% if @community.avatar.attached? %>
+  <div style="margin-top:8px;"><%= image_tag @community.avatar, style: "width:96px;height:96px;object-fit:cover;border-radius:8px;" %></div>
+<% end %>
+
+<h2>Posts</h2>
+<ul>
+  <% @community.posts.order(created_at: :desc).each do |p| %>
+    <li>
+      <strong><%= link_to p.title, p.url, target: "_blank", rel: "noopener" %></strong>
+      (<%= link_to "view", post_path(p) %>)
+    </li>
+  <% end %>
+</ul>
+
+<p style="margin-top:1rem;">
+  <%= link_to "Back to communities", communities_path %>
+</p>

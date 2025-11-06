@@ -3,32 +3,36 @@ class PostsController < ApplicationController
   before_action :require_login, only: %i[ new create edit update destroy ]
 
   def index
-    @posts = Post.includes(:user).order(created_at: :desc) # más nuevo primero
+    @posts = Post.includes(:user, :community).order(created_at: :desc) # más nuevo primero
   end
 
-  def show; end
+  def show
+  end
 
   def new
-    @post = Post.new(community: "programming") # comunidad hardcoded de momento
+    @post = Post.new
+    @communities = Community.order(:slug)  # 🔥 cargar comunidades para el selector
   end
 
   def create
     @post = current_user.posts.build(post_params)
-    @post.community ||= "programming"
-
     if @post.save
       redirect_to posts_path, notice: "Post creado correctamente."
     else
+      @communities = Community.order(:slug) # recargar comunidades si hay error
       render :new, status: :unprocessable_entity
     end
   end
 
-  def edit; end
+  def edit
+    @communities = Community.order(:slug)
+  end
 
   def update
     if @post.update(post_params)
       redirect_to @post, notice: "Post actualizado."
     else
+      @communities = Community.order(:slug)
       render :edit, status: :unprocessable_entity
     end
   end
@@ -45,6 +49,6 @@ class PostsController < ApplicationController
   end
 
   def post_params
-    params.require(:post).permit(:title, :url, :body, :community)
+    params.require(:post).permit(:title, :url, :body, :community_id)  # 🔥 ahora community_id
   end
 end
