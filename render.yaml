@@ -1,12 +1,12 @@
 databases:
-  - name: waslab04
-    databaseName: waslab04
-    user: waslab04
+  - name: asw2526-pd13b
+    databaseName: asw2526-pd13b
+    user: Xavi533
     plan: free
 
 services:
   - type: web
-    name: waslab04
+    name: asw2526-pd13b-1
     runtime: ruby
     plan: free
     buildCommand: "./bin/render-build.sh"
