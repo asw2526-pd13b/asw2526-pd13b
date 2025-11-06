@@ -1,0 +1,36 @@
+<%= form_with(model: post, local: true) do |form| %>
+  <% if post.errors.any? %>
+    <div id="error_explanation">
+      <h2><%= pluralize(post.errors.count, "error") %> impidieron guardar el post:</h2>
+      <ul>
+      <% post.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+      </ul>
+    </div>
+  <% end %>
+
+  <div>
+    <%= form.label :url, "External URL" %><br>
+    <%= form.text_field :url, required: true, placeholder: "https://..." %>
+  </div>
+
+  <div>
+    <%= form.label :title, "Title" %><br>
+    <%= form.text_field :title, required: true, placeholder: "A short, descriptive title" %>
+  </div>
+
+  <div>
+    <%= form.label :body, "Body (optional)" %><br>
+    <%= form.text_area :body, rows: 5 %>
+  </div>
+
+  <div>
+    <%= form.label :community, "Community (hardcoded por ahora)" %><br>
+    <%= form.text_field :community, value: post.community.presence || "programming" %>
+  </div>
+
+  <div style="margin-top: 1rem;">
+    <%= form.submit "Create Post" %>
+  </div>
+<% end %>
