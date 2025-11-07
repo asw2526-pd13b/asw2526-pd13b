@@ -1,33 +1,57 @@
 <h1>Posts</h1>
+
 <p>
   <%= link_to "Communities", communities_path %> |
   <%= link_to "New Community", new_community_path %>
 </p>
+
 <p><%= link_to "Create Post", new_post_path %></p>
 
 <% if @posts.any? %>
-  <ul>
+  <ul style="list-style:none; padding-left:0;">
     <% @posts.each do |post| %>
-      <li style="margin-bottom: 1rem;">
-        <div>
-          <strong>
-            <%= link_to post.title, post.url, target: "_blank", rel: "noopener" %>
-          </strong>
-          <% if post.community.present? %>
-            <span>— <%= link_to post.community.slug, community_path(post.community) %></span>
+      <li style="margin: 16px 0; padding: 12px 0; border-bottom: 1px solid #ddd;">
+        <div style="display:flex; gap:12px; align-items:flex-start;">
+          <!-- Miniatura cuadrada -->
+          <% if post.image.attached? %>
+            <%= link_to post_path(post), style: "display:block; flex:0 0 auto;" do %>
+              <% if post.image.variable? %>
+                <%= image_tag post.image.variant(resize_to_fill: [96, 96]),
+                      style: "width:96px;height:96px;object-fit:cover;border-radius:8px;display:block;" %>
+              <% else %>
+                <%= image_tag post.image,
+                      style: "width:96px;height:96px;object-fit:cover;border-radius:8px;display:block;" %>
+              <% end %>
+            <% end %>
           <% else %>
-            <span>— (sin comunidad)</span>
+            <!-- Placeholder si no hay imagen -->
+            <div style="width:96px;height:96px;border-radius:8px;background:#eee;flex:0 0 auto;"></div>
           <% end %>
-        </div>
 
-        <div style="font-size: 0.9rem; color: #555;">
-          by <%= post.user.display_name %> (@<%= post.user.username %>) ·
-          <%= time_ago_in_words(post.created_at) %> ago
-        </div>
+          <!-- Contenido -->
+          <div style="min-width:0;">
+            <div>
+              <strong>
+                <%= link_to post.title, post.url, target: "_blank", rel: "noopener" %>
+              </strong>
+              <% if post.community.present? %>
+                <span>— <%= link_to post.community.slug, community_path(post.community) %></span>
+              <% else %>
+                <span>— (sin comunidad)</span>
+              <% end %>
+            </div>
 
-        <% if post.body.present? %>
-          <p><%= simple_format(post.body) %></p>
-        <% end %>
+            <div style="font-size: 0.9rem; color: #555;">
+              by <%= post.user.display_name %> (@<%= post.user.username %>) ·
+              <%= time_ago_in_words(post.created_at) %> ago
+              · <%= link_to "view", post_path(post) %>
+            </div>
+
+            <% if post.body.present? %>
+              <p style="margin:8px 0 0 0;"><%= simple_format(post.body) %></p>
+            <% end %>
+          </div>
+        </div>
       </li>
     <% end %>
   </ul>

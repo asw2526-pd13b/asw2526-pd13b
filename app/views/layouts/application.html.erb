@@ -1,27 +1,31 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title><%= content_for(:title) || "Waslab04" %></title>
+    <title>Waslab04</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
 
-    <%= yield :head %>
-
-    <%# Enable PWA manifest for installable apps (make sure to enable in config/routes.rb too!) %>
-    <%#= tag.link rel: "manifest", href: pwa_manifest_path(format: :json) %>
-
-    <link rel="icon" href="/icon.png" type="image/png">
-    <link rel="icon" href="/icon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/icon.png">
-
-    <%# Includes all stylesheet files in app/assets/stylesheets %>
-    <%= stylesheet_link_tag :app %>
   </head>
 
-  <body>
-    <%= yield %>
+  <body style="font-family:sans-serif; margin:20px;">
+
+    <!-- 🔹 Botón fijo para volver a la página principal -->
+    <div style="position:fixed; top:12px; left:12px; z-index:1000;">
+      <%= link_to "HOME", posts_path,
+          style: "background:#2d6cdf; color:white; text-decoration:none; padding:8px 12px; border-radius:8px; font-weight:bold;" %>
+    </div>
+
+    <!-- 🔹 Contenido de cada vista -->
+    <div style="margin-top:60px;">
+      <% if notice %>
+        <p style="background:#e6f4ea; border:1px solid #a8e6a2; padding:8px; border-radius:6px; color:#1b5e20;">
+          <%= notice %>
+        </p>
+      <% end %>
+
+      <%= yield %>
+    </div>
+
   </body>
 </html>

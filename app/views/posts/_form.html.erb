@@ -30,6 +30,11 @@
     <%= form.collection_select :community_id, @communities, :id, :slug, prompt: "Select a community" %>
   </div>
 
+  <div>
+    <%= form.label :image, "Imatge (opcional)" %><br>
+    <%= form.file_field :image, accept: "image/*" %>
+  </div>
+
   <div style="margin-top: 1rem;">
     <%= form.submit "Create Post" %>
   </div>

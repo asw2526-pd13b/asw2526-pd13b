@@ -41,7 +41,6 @@ Rails.application.configure do
   config.active_record.query_log_tags_enabled = true
 
   config.active_storage.service = :local
-
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
 

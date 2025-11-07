@@ -49,6 +49,6 @@ class PostsController < ApplicationController
   end
 
   def post_params
-    params.require(:post).permit(:title, :url, :body, :community_id)  # 🔥 ahora community_id
+    params.require(:post).permit(:title, :url, :body, :community_id, :image)  # 🔥 ahora community_id
   end
 end
