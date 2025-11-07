@@ -1,5 +1,7 @@
 class Community < ApplicationRecord
   has_many :posts, dependent: :destroy
+  has_many :subscriptions, dependent: :destroy
+  has_many :subscribers, through: :subscriptions, source: :user
 
   # ActiveStorage
   has_one_attached :banner

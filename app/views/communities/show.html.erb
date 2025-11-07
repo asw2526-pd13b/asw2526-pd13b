@@ -9,6 +9,14 @@
   <div style="margin-top:8px;"><%= image_tag @community.avatar, style: "width:96px;height:96px;object-fit:cover;border-radius:8px;" %></div>
 <% end %>
 
+<p style="margin-top: 10px;">
+  <% if current_user.subscribed_communities.exists?(@community.id) %>
+    <%= button_to "Donar de baixa", unsubscribe_community_path(@community), method: :delete %>
+  <% else %>
+    <%= button_to "Subscriure", subscribe_community_path(@community), method: :post %>
+  <% end %>
+</p>
+
 <h2>Posts</h2>
 <ul>
   <% @community.posts.order(created_at: :desc).each do |p| %>
