@@ -4,6 +4,9 @@ Rails.application.routes.draw do
     delete :unsubscribe, on: :member
   end
   resources :users
-  resources :posts
+  resources :posts do
+    resources :comments, only: [:create]   # /posts/:post_id/comments
+  end
+  resources :comments, only: [:destroy]
   root "posts#index"
 end
