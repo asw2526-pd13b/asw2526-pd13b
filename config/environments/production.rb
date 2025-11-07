@@ -43,9 +43,6 @@ Rails.application.configure do
   # Don't log any deprecations.
   config.active_support.report_deprecations = false
 
-  config.active_storage.service = :amazon
-
-
   # Replace the default in-process memory cache store with a durable alternative.
   # config.cache_store = :mem_cache_store
 
@@ -58,6 +55,9 @@ Rails.application.configure do
 
   # Only use :id for inspections in production.
   config.active_record.attributes_for_inspect = [ :id ]
+
+  config.active_storage.service = :local
+
 
   # Enable DNS rebinding protection and other `Host` header attacks.
   # config.hosts = [
