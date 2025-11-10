@@ -10,7 +10,7 @@ class Community < ApplicationRecord
   # Validaciones
   validates :slug, presence: true, uniqueness: true,
                    format: { with: /\A[a-z0-9-]+\z/, message: "usa solo minúsculas, números y guiones" }
-  # name es opcional
+  validates :name, presence: true
 
   # Usar slug en las URLs (/communities/:slug)
   def to_param

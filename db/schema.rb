@@ -79,10 +79,22 @@ ActiveRecord::Schema[8.0].define(version: 2025_11_07_112954) do
   end
 
   create_table "users", force: :cascade do |t|
-    t.string "username"
+    t.string "email", default: "", null: false
+    t.string "username", null: false
     t.string "display_name"
+    t.string "provider"
+    t.string "uid"
+    t.string "avatar_url"
+    t.integer "sign_in_count", default: 0, null: false
+    t.datetime "current_sign_in_at"
+    t.datetime "last_sign_in_at"
+    t.string "current_sign_in_ip"
+    t.string "last_sign_in_ip"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["email"], name: "index_users_on_email", unique: true
+    t.index ["provider", "uid"], name: "index_users_on_provider_and_uid", unique: true
+    t.index ["username"], name: "index_users_on_username", unique: true
   end
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"

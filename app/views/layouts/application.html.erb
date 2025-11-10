@@ -1,31 +1,44 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Waslab04</title>
+    <title><%= content_for(:title) || "Waslab04" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
+    <%= yield :head %>
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <%= stylesheet_link_tag :app %>
   </head>
-
-  <body style="font-family:sans-serif; margin:20px;">
-
-    <!-- 🔹 Botón fijo para volver a la página principal -->
-    <div style="position:fixed; top:12px; left:12px; z-index:1000;">
-      <%= link_to "HOME", posts_path,
-          style: "background:#2d6cdf; color:white; text-decoration:none; padding:8px 12px; border-radius:8px; font-weight:bold;" %>
-    </div>
-
-    <!-- 🔹 Contenido de cada vista -->
-    <div style="margin-top:60px;">
+  <body>
+    <header>
+      <nav style="padding: 1rem; background: #f5f5f5; margin-bottom: 2rem;">
+        <%= link_to "programming.dev", posts_path,
+            style: "font-weight: bold; text-decoration: none; color: black; font-size: 1.2em;" %>
+        <div style="float: right;">
+          <% if user_signed_in? %>
+            Hola, <%= current_user.username %>!
+            <%= button_to "Logout", destroy_user_session_path, method: :delete,
+                style: "margin-left: 1rem; display: inline; padding: 0; border: none; background: none; color: #0066cc; text-decoration: underline; cursor: pointer; font-size: 1em;" %>
+          <% else %>
+            <%= button_to "Sign in with GitHub", user_github_omniauth_authorize_path, method: :post, data: { turbo: false } %>
+          <% end %>
+        </div>
+      </nav>
+    </header>
+    <main style="padding: 0 2rem;">
       <% if notice %>
         <p style="background:#e6f4ea; border:1px solid #a8e6a2; padding:8px; border-radius:6px; color:#1b5e20;">
           <%= notice %>
         </p>
       <% end %>
-
+      <% if alert %>
+        <p style="color: red;"><%= alert %></p>
+      <% end %>
       <%= yield %>
-    </div>
-
+    </main>
   </body>
 </html>
