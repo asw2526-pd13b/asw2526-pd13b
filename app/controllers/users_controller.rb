@@ -4,10 +4,15 @@ class UsersController < ApplicationController
   before_action :authorize_user!, only: [:edit, :update]
 
   def index
-    @users = User.all
+    @users = User.order(created_at: :desc)
   end
 
   def show
+    @posts = @user.posts.order(created_at: :desc).limit(20)
+    @comments = @user.comments.includes(:post).order(created_at: :desc).limit(20)
+
+    # Tab actiu (per defecte: posts)
+    @active_tab = params[:tab] || 'posts'
   end
 
   def edit
@@ -34,6 +39,6 @@ class UsersController < ApplicationController
   end
 
   def user_params
-    params.require(:user).permit(:display_name)
+    params.require(:user).permit(:display_name, :bio, :banner_url)
   end
 end

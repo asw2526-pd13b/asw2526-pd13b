@@ -22,4 +22,17 @@ class User < ApplicationRecord
   def password_required?
     false
   end
+
+  # Mètodes auxiliars per al perfil
+  def posts_count
+    posts.count
+  end
+
+  def comments_count
+    comments.count
+  end
+
+  def name
+    display_name.presence || username
+  end
 end
