@@ -24,7 +24,24 @@
               id: "navTitle",
               title: "A collection of programming communities" %>
             <div class="collapse navbar-collapse my-2" id="navbarDropdown">
-              <ul>
+              <ul class="navbar-nav" id="navbarIcons">
+                <% if user_signed_in? %>
+                  <li class="nav-item">
+                    <%= link_to current_user.username, user_path(current_user), class: "nav-link" %>
+                  </li>
+                  <li class="nav-item">
+                    <%# Per fer logout en una navbar, és més net un link_to amb turbo_method que un button_to %>
+                    <%= link_to "Logout", destroy_user_session_path, data: { turbo_method: :delete }, class: "nav-link" %>
+                  </li>
+                <% else %>
+                  <li class="nav-item">
+                    <%# Aquest botó manté la teva lògica de 'Sign in' %>
+                    <%= button_to "Sign in with GitHub", user_github_omniauth_authorize_path,
+                          method: :post,
+                          data: { turbo: false },
+                          class: "btn btn-primary btn-sm" %>
+                  </li>
+                <% end %>
               </ul>
             </div>
           </nav>
