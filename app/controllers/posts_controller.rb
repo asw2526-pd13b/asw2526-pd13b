@@ -2,9 +2,41 @@ class PostsController < ApplicationController
   before_action :set_post, only: %i[ show edit update destroy ]
   before_action :require_login, only: %i[ new create edit update destroy ]
 
-  def index
-    @posts = Post.includes(:user, :community).order(created_at: :desc) # más nuevo primero
+def index
+  # --- 🔹 Punt de partida: carregar posts amb usuari i comunitat
+  @posts = Post.includes(:user, :community)
+
+  # ---  Cercador
+  if params[:q].present?
+    query = "%#{params[:q]}%"
+    @posts = @posts.where("title ILIKE ? OR body ILIKE ?", query, query)
   end
+
+  # --- ⚙ Filtres
+  case params[:filter]
+  when "subscribed"
+    if current_user.respond_to?(:subscribed_communities)
+      ids = current_user.subscribed_communities.pluck(:id)
+      @posts = @posts.where(community_id: ids)
+    end
+  when "local"
+    # No fem res especial, simplement mostrem tots els posts locals
+  end
+
+    # ---  Ordenació addicional
+  case params[:sort]
+  when "old"
+    @posts = @posts.order(created_at: :asc)
+  when "popular"
+    # En aquest lliurament encara no tenim vots, així que ordenem per nombre de comentaris
+    @posts = @posts.left_joins(:comments)
+                   .group("posts.id")
+                   .order("COUNT(comments.id) DESC")
+  else
+    @posts = @posts.order(created_at: :desc)
+  end
+
+end
 
   def show
   end

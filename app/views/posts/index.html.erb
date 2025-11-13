@@ -1,4 +1,13 @@
 <h1>Posts</h1>
+<!--  Cercador simple de posts -->
+<%= form_with url: posts_path, method: :get, local: true do %>
+  <div style="margin: 0 0 1rem 0;">
+    <%= label_tag :q, "Cercar:" %>
+    <%= text_field_tag :q, params[:q], placeholder: "Títol o cos...", style: "width:220px" %>
+    <%= submit_tag "Cerca" %>
+  </div>
+<% end %>
+<!-- 🔍 Fi cercador -->
 
 <p>
   <%= link_to "Communities", communities_path %> |
