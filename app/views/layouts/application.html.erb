@@ -14,10 +14,38 @@
     <%= stylesheet_link_tag :app %>
   </head>
   <body>
-    <header>
+    <div id='root'>
+      <div>
+        <div class="shadow-sm">
+          <nav class="navbar navbar-expand-md navbar-light p-0 px-3 container-lg" id="navbar">
+            <%= link_to "programming.dev", posts_path,
+              class: "d-flex align-items-center navbar-brand me-md-3 active",
+              aria: { current: "true" },
+              id: "navTitle",
+              title: "A collection of programming communities" %>
+            <div class="collapse navbar-collapse my-2" id="navbarDropdown">
+              <ul>
+              </ul>
+            </div>
+          </nav>
+        </div>
+        <main style="padding: 0 2rem;">
+          <% if notice %>
+            <p style="background:#e6f4ea; border:1px solid #a8e6a2; padding:8px; border-radius:6px; color:#1b5e20;">
+              <%= notice %>
+            </p>
+          <% end %>
+          <% if alert %>
+            <p style="color: red;"><%= alert %></p>
+          <% end %>
+          <%= yield %>
+        </main>
+      </div>
+    </div>
+
+    <!--header>
       <nav style="padding: 1rem; background: #f5f5f5; margin-bottom: 2rem;">
-        <%= link_to "programming.dev", posts_path,
-            style: "font-weight: bold; text-decoration: none; color: black; font-size: 1.2em;" %>
+        <%= link_to "programming.dev", posts_path %>
       </nav>
       <div style="float: right;">
         <% if user_signed_in? %>
@@ -39,6 +67,6 @@
         <p style="color: red;"><%= alert %></p>
       <% end %>
       <%= yield %>
-    </main>
+    </main-->
   </body>
 </html>
