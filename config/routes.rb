@@ -1,14 +1,32 @@
 Rails.application.routes.draw do
-  # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+  # Devise per OAuth
+  devise_for :users,
+    controllers: {
+      omniauth_callbacks: 'users/omniauth_callbacks',
+      sessions: 'devise/sessions'
+    },
+    skip: [:registrations, :passwords, :confirmations]
 
-  # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
-  # Can be used by load balancers and uptime monitors to verify that the app is live.
+  # Ruta de logout explícita ABANS de resources :users
+  devise_scope :user do
+    delete '/sign_out', to: 'devise/sessions#destroy', as: :destroy_user_session
+  end
+
+  # Resources - users VA DESPRÉS
+  resources :communities do
+    post   :subscribe,   on: :member
+    delete :unsubscribe, on: :member
+  end
+
+  resources :users, only: [:index, :show, :edit, :update]
+
+  resources :posts do
+    resources :comments, only: [:create]
+  end
+
+  resources :comments, only: [:destroy]
+
   get "up" => "rails/health#show", as: :rails_health_check
 
-  # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
-  # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
-  # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
-
-  # Defines the root path route ("/")
-  root "application#hello"
+  root "posts#index"
 end

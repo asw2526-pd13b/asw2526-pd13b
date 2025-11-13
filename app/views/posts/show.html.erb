@@ -1,0 +1,108 @@
+<h1><%= @post.title %></h1>
+
+<p style="margin: 8px 0;">
+  <strong>Link:</strong> <%= link_to @post.url, @post.url, target: "_blank", rel: "noopener" %><br>
+  <strong>Community:</strong>
+  <% if @post.community.present? %>
+    <%= link_to @post.community.slug, community_path(@post.community) %>
+  <% else %>
+    (sin comunidad)
+  <% end %><br>
+  <strong>Author:</strong> <%= @post.user.display_name %> (@<%= @post.user.username %>)
+  · <%= time_ago_in_words(@post.created_at) %> ago
+</p>
+
+<% if @post.image.attached? %>
+  <div style="margin: 10px 0;">
+    <% if @post.image.variable? %>
+      <%= image_tag @post.image.variant(resize_to_limit: [900, 600]),
+            style: "max-width:100%;height:auto;border-radius:10px;" %>
+    <% else %>
+      <%= image_tag @post.image, style: "max-width:100%;height:auto;border-radius:10px;" %>
+    <% end %>
+  </div>
+<% end %>
+
+<% if @post.body.present? %>
+  <div style="margin-top: 10px;">
+    <%= simple_format(@post.body) %>
+  </div>
+<% end %>
+
+<p style="margin-top: 12px;">
+  <%= link_to "Edit", edit_post_path(@post) %> |
+  <%= link_to "Back to Posts", posts_path %>
+</p>
+
+<hr>
+
+<!-- Orden de comentarios -->
+<% current_sort = params[:sort].presence || "new" %>
+<p>
+  Comments order:
+  <%# Popular lo implementaremos cuando haya votos %>
+  <%= link_to "Nou", post_path(@post, sort: "new") %> |
+  <%= link_to "Antic", post_path(@post, sort: "old") %>
+  <%# | <%= link_to "Popular", post_path(@post, sort: "popular") %> %>
+</p>
+
+<!-- Listado de comentarios (1 nivel + respuestas, sin límite) -->
+<%# Cargamos los comentarios ya ordenados desde el controlador de Posts o aquí %>
+<% comments_scope =
+     case params[:sort]
+     when "old" then @post.comments.includes(:user).oldest_first
+     else            @post.comments.includes(:user).newest_first
+     end %>
+
+<h2>Comments (<%= comments_scope.count %>)</h2>
+
+<ul style="list-style:none; padding-left:0;">
+  <%# Mostramos solo los "root" (sin parent) y bajo cada uno sus replies %>
+  <% comments_scope.where(parent_id: nil).each do |c| %>
+    <li style="margin:12px 0; padding:8px 0; border-bottom:1px solid #eee;">
+      <div style="font-size:0.9rem;color:#555;">
+        <strong><%= c.user.display_name %></strong> · <%= time_ago_in_words(c.created_at) %> ago
+      </div>
+      <div><%= simple_format(c.body) %></div>
+
+      <!-- Responder (mismo post, parent_id = c.id) -->
+      <div style="margin-top:6px;">
+        <%= form_with url: post_comments_path(@post, sort: params[:sort]), local: true do |f| %>
+          <%= hidden_field_tag "comment[parent_id]", c.id %>
+          <%= text_area_tag "comment[body]", nil, rows: 2, placeholder: "Responder...", style: "width:100%;" %><br>
+          <%= submit_tag "Responder" %>
+        <% end %>
+      </div>
+
+      <%# Replies (sin límite de niveles; mostramos recursivamente un nivel más por simplicidad) %>
+      <% c.replies.order(created_at: :asc).each do |r| %>
+        <div style="margin-left:16px; margin-top:8px; padding-left:8px; border-left:2px solid #ddd;">
+          <div style="font-size:0.85rem;color:#666;">
+            <strong><%= r.user.display_name %></strong> · <%= time_ago_in_words(r.created_at) %> ago
+          </div>
+          <div><%= simple_format(r.body) %></div>
+
+          <% if r.user_id == current_user.id %>
+            <div style="margin-top:4px;">
+              <%= button_to "Eliminar", comment_path(r, sort: params[:sort]), method: :delete, form: {style: "display:inline"} %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+
+      <% if c.user_id == current_user.id %>
+        <div style="margin-top:4px;">
+          <%= button_to "Eliminar", comment_path(c, sort: params[:sort]), method: :delete, form: {style: "display:inline"} %>
+        </div>
+      <% end %>
+    </li>
+  <% end %>
+</ul>
+
+<!-- Formulario para comentar a nivel raíz -->
+<h3>Nuevo comentario</h3>
+<%= form_with url: post_comments_path(@post, sort: params[:sort]), local: true do |f| %>
+  <%= hidden_field_tag "comment[parent_id]", nil %>
+  <%= text_area_tag "comment[body]", nil, rows: 4, placeholder: "Escribe tu comentario…", style: "width:100%;" %><br>
+  <%= submit_tag "Comentar" %>
+<% end %>

@@ -40,6 +40,7 @@ Rails.application.configure do
   # Append comments with runtime information tags to SQL queries in logs.
   config.active_record.query_log_tags_enabled = true
 
+  config.active_storage.service = :local
   # Raises error for missing translations.
   # config.i18n.raise_on_missing_translations = true
 
@@ -51,4 +52,5 @@ Rails.application.configure do
 
   # Allow connections to local server on cloud IDE.
   config.hosts.clear
+
 end

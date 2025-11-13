@@ -1,0 +1,36 @@
+<h1>Communities</h1>
+
+<p>
+  <%= link_to "Local", communities_path %> |
+  <%= link_to "Subscrit", communities_path(filter: :subscribed) %> |
+  <%= link_to "New Community", new_community_path %>
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Nom</th>
+      <th># Subscriptors</th>
+      <th># Publicacions</th>
+      <th># Comentaris</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <% @communities.each do |c| %>
+      <tr>
+        <td><%= link_to (c.name.presence || c.slug), community_path(c) %></td>
+        <td><%= c.subscribers.count %></td>
+        <td><%= c.posts.count %></td>
+        <td><%= Comment.joins(:post).where(posts: { community_id: c.id }).count rescue 0 %></td>
+        <td>
+          <% if current_user.subscribed_communities.exists?(c.id) %>
+            <%= button_to "Donar de baixa", unsubscribe_community_path(c), method: :delete %>
+          <% else %>
+            <%= button_to "Subscriure", subscribe_community_path(c), method: :post %>
+          <% end %>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
