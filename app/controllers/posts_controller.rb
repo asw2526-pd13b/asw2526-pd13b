@@ -6,11 +6,14 @@ def index
   # --- 🔹 Punt de partida: carregar posts amb usuari i comunitat
   @posts = Post.includes(:user, :community)
 
-  # ---  Cercador
-  if params[:q].present?
-    query = "%#{params[:q]}%"
-    @posts = @posts.where("title ILIKE ? OR body ILIKE ?", query, query)
-  end
+if params[:q].present?
+  query = "%#{params[:q]}%"
+  @posts = @posts.where(
+    "title LIKE :q OR body LIKE :q",
+    q: query
+  )
+end
+
 
   # --- ⚙ Filtres
   case params[:filter]

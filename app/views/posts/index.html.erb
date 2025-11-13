@@ -7,7 +7,22 @@
     <%= submit_tag "Cerca" %>
   </div>
 <% end %>
-<!-- 🔍 Fi cercador -->
+<!--  Fi cercador -->
+<!--  Filtres -->
+<div style="margin: 0 0 1rem 0;">
+  <strong>Filtres:</strong>
+  <%= link_to "Tots", posts_path %> |
+  <%= link_to "Subscrit", posts_path(filter: "subscribed") %> |
+  <%= link_to "Local", posts_path(filter: "local") %>
+</div>
+
+<!-- Ordenació -->
+<div style="margin: 0 0 1rem 0;">
+  <strong>Ordenar per:</strong>
+  <%= link_to "Nou", posts_path(sort: "new") %> |
+  <%= link_to "Antic", posts_path(sort: "old") %> |
+  <%= link_to "Popular", posts_path(sort: "popular") %>
+</div>
 
 <p>
   <%= link_to "Communities", communities_path %> |
