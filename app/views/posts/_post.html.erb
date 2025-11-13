@@ -1,27 +1,121 @@
-<div id="<%= dom_id post %>">
-  <p>
-    <strong>Title:</strong>
-    <%= post.title %>
-  </p>
+<%# Reemplaza TODO tu fichero _post.html.erb con esto %>
 
-  <p>
-    <strong>Url:</strong>
-    <%= post.url %>
-  </p>
+<div class="post-listing mt-2" id="<%= dom_id post %>">
+  <div class="d-none d-sm-block">
+    <article class="row post-container">
 
-  <p>
-    <strong>Body:</strong>
-    <%= post.body %>
-  </p>
+      <div class="col flex-grow-0">
+        <div class="vote-bar small text-center">
+          <button class="btn-animate btn btn-link p-0 text-muted" type="button" aria-label="Dona un vot positiu">
+            <svg class="icon upvote">
+              <use xlink:href="<%= asset_path('symbols.svg') %>#icon-arrow-up1"></use>
+            </svg>
+          </button>
 
-  <p>
-    <strong>User:</strong>
-    <%= post.user_id %>
-  </p>
+          <div class="unselectable pointer text-muted post-score">
+            <%# TODO: Cambia '67' por tu variable de votos, ej: post.votes_count %>
+            67
+          </div>
 
-  <p>
-    <strong>Community:</strong>
-    <%= post.community %>
-  </p>
+          <button class="btn-animate btn btn-link p-0 text-muted" type="button" aria-label="Dona un vot negatiu">
+            <svg class="icon downvote">
+              <use xlink:href="<%= asset_path('symbols.svg') %>#icon-arrow-down1"></use>
+            </svg>
+          </button>
+        </div>
+      </div>
 
+      <div class="col flex-grow-1">
+        <div class="row">
+
+          <div class="col flex-grow-0 px-0">
+            <div>
+              <%= link_to post.url,
+                    rel: "noopener nofollow",
+                    title: post.url,
+                    target: "_blank",
+                    class: "thumbnail rounded overflow-hidden d-inline-block position-relative p-0 border-0" do %>
+
+                <% if post.image.attached? %>
+                  <% if post.image.variable? %>
+                    <%= image_tag post.image.variant(resize_to_fill: [70, 70]),
+                          class: "overflow-hidden pictrs-image img-fluid thumbnail rounded object-fit-cover",
+                          loading: "lazy", alt: "" %>
+                  <% else %>
+                    <%= image_tag post.image,
+                          class: "overflow-hidden pictrs-image img-fluid thumbnail rounded object-fit-cover",
+                          loading: "lazy", alt: "" %>
+                  <% end %>
+                <% else %>
+                  <%# Placeholder si no hay imagen (ajustado a 70x70 como en el HTML) %>
+                  <div class="thumbnail-placeholder" style="width:70px; height:70px; background-color: #eee; border-radius: 4px;"></div>
+                <% end %>
+
+                <svg class="icon d-block text-white position-absolute end-0 top-0 mini-overlay text-opacity-75 text-opacity-100-hover">
+                  <use xlink:href="<%= asset_path('symbols.svg') %>#icon-external-link"></use>
+                </svg>
+              <% end %>
+            </div>
+          </div>
+
+          <div class="col flex-grow-1">
+
+            <div class="post-title">
+              <h1 class="h5 d-inline text-break">
+                <%= link_to post_path(post), class: "d-inline link-dark", title: "Comentaris" do %>
+                  <span class="d-inline"><%= post.title %></span>
+                <% end %>
+              </h1>
+            </div>
+
+            <p class="small m-0">
+              <%= link_to post.url.sub(/https?:\/\//, '').split('/').first, post.url,
+                    title: post.url,
+                    rel: "noopener nofollow",
+                    class: "fst-italic link-dark link-opacity-75 link-opacity-100-hover" %>
+            </p>
+
+            <div class="small mb-1 mb-md-0">
+              <%= link_to user_path(post.user), class: "person-listing d-inline-flex align-items-baseline text-info", title: post.user.username do %>
+                <%# TODO: Añade el avatar del usuario si lo tienes %>
+                <span><%= post.user.username %></span> <%# Asumiendo que 'username' existe %>
+              <% end %>
+
+              a
+
+              <%# ESTA LÓGICA EVITA EL ERROR 500 %>
+              <% if post.community.present? %>
+                <%= link_to community_path(post.community), class: "community-link", title: post.community.name do %>
+                   <%# TODO: Añade el icono de la comunidad si lo tienes %>
+                  <span class="overflow-wrap-anywhere"><%= post.community.name %></span>
+                <% end %>
+              <% end %>
+
+              ·
+
+              <span class="moment-time pointer unselectable" data-tippy-content="<%= post.created_at.iso8601 %>">
+                <%= time_ago_in_words(post.created_at) %> ago
+              </span>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-start flex-wrap text-muted">
+              <%= link_to post_path(post), class: "btn btn-link btn-sm text-muted ps-0", title: "Comentaris" do %>
+                <svg class="icon me-1 icon-inline">
+                  <use xlink:href="<%= asset_path('symbols.svg') %>#icon-message-square"></use>
+                </svg>
+                <%# TODO: Cambia '67' por tu variable de comentarios, ej: post.comments_count %>
+                67
+              <% end %>
+
+              <%= link_to post_path(post), class: "btn btn-link btn-animate text-muted", title: "enllaç" do %>
+                <svg class="icon icon-inline">
+                  <use xlink:href="<%= asset_path('symbols.svg') %>#icon-link"></use>
+                </svg>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  </div>
 </div>

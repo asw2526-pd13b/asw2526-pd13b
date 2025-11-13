@@ -37,18 +37,34 @@
               </ul>
 
               <ul class="navbar-nav" id="navbarIcons">
+                <%# Substitueix el teu antic <li class="nav-item" id="navSearch">...</li> per aquest %>
+                <li class="nav-item" id="navSearch">
 
+                  <%# Utilitzem el teu formulari que envia a posts_path %>
+                  <%= form_with url: posts_path, method: :get, local: true, class: "d-flex" do |f| %>
 
+                    <%#
+                      Utilitzem f.text_field en lloc de text_field_tag
+                      perquè està dins d'un bloc form_with.
+                    %>
+                    <%= f.text_field :q,
+                          value: params[:q],
+                          class: "form-control form-control-sm me-2",
+                          placeholder: "Cercar posts..." %>
 
-                <!--  Cercador simple de posts -->
-                <%= form_with url: posts_path, method: :get, local: true do %>
-                  <div style="margin: 0 0 1rem 0;">
-                    <%= label_tag :q, "Cercar:" %>
-                    <%= text_field_tag :q, params[:q], placeholder: "Títol o cos...", style: "width:220px" %>
-                    <%= submit_tag "Cerca" %>
-                  </div>
-                <% end %>
-                <!--  Fi cercador -->
+                    <%#
+                      Fem un botó de submit que només contingui la icona
+                      i utilitzem btn-outline-secondary per quadrar amb l'estil.
+                    %>
+                    <button type="submit" class="btn btn-outline-secondary btn-sm" title="Cercar">
+                      <svg class="icon">
+                        <use xlink:href="<%= asset_path('symbols.svg') %>#icon-search"></use>
+                        <div class="visually-hidden"><title>search</title></div>
+                      </svg>
+                    </button>
+
+                  <% end %>
+                </li>
 
                 <% if user_signed_in? %>
                   <li class="nav-item">
