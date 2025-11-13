@@ -73,7 +73,9 @@
             </div>
 
             <div style="font-size: 0.9rem; color: #555;">
-              by <%= post.user.display_name %> (@<%= post.user.username %>) ·
+              by
+              <%= link_to post.user.display_name, user_path(post.user) %>
+              (@<%= post.user.username %>) ·
               <%= time_ago_in_words(post.created_at) %> ago
               · <%= link_to "view", post_path(post) %>
             </div>

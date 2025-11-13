@@ -17,7 +17,8 @@
   <% else %>
     (sin comunidad)
   <% end %><br>
-  <strong>Author:</strong> <%= @post.user.display_name %> (@<%= @post.user.username %>)
+  <%= link_to @post.user.display_name, user_path(@post.user) %>
+    (@<%= @post.user.username %>)
   · <%= time_ago_in_words(@post.created_at) %> ago
 </p>
 
@@ -73,7 +74,7 @@
 
       <!-- Comentario principal -->
       <div style="font-size:0.9rem;color:#555;">
-        <strong><%= c.user.display_name %></strong>
+        <strong><%= link_to c.user.display_name, user_path(c.user) %></strong>
         · <%= time_ago_in_words(c.created_at) %> ago
       </div>
 
@@ -102,7 +103,7 @@
         <div style="margin-left:16px; margin-top:8px; padding-left:8px; border-left:2px solid #ddd;">
 
           <div style="font-size:0.85rem;color:#666;">
-            <strong><%= r.user.display_name %></strong>
+            <strong><%= link_to r.user.display_name, user_path(r.user) %></strong>
             · <%= time_ago_in_words(r.created_at) %> ago
           </div>
 
