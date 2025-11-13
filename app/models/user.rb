@@ -6,6 +6,7 @@ class User < ApplicationRecord
   has_many :comments, dependent: :destroy
   has_many :subscriptions, dependent: :destroy
   has_many :subscribed_communities, through: :subscriptions, source: :community
+  has_many :votes, dependent: :destroy
 
   validates :username, presence: true, uniqueness: true
   validates :email, presence: true, uniqueness: true
