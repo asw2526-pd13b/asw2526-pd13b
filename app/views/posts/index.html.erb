@@ -19,9 +19,10 @@
 <!-- Ordenació -->
 <div style="margin: 0 0 1rem 0;">
   <strong>Ordenar per:</strong>
-  <%= link_to "Nou", posts_path(sort: "new") %> |
-  <%= link_to "Antic", posts_path(sort: "old") %> |
-  <%= link_to "Popular", posts_path(sort: "popular") %>
+  <%= link_to "Nou", posts_path(sort: "new",      filter: params[:filter], q: params[:q]) %> |
+  <%= link_to "Antic", posts_path(sort: "old",     filter: params[:filter], q: params[:q]) %> |
+  <%= link_to "Més comentaris", posts_path(sort: "comments", filter: params[:filter], q: params[:q]) %> |
+  <%= link_to "El millor", posts_path(sort: "top",    filter: params[:filter], q: params[:q]) %>
 </div>
 
 <p>
@@ -63,6 +64,12 @@
               <% else %>
                 <span>— (sin comunidad)</span>
               <% end %>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:6px; margin:6px 0;">
+              <%= button_to "+", vote_path("Post", post.id, 1), method: :post, form: { style: "display:inline-block;margin-right:4px;" } %>
+              <%= button_to "-", vote_path("Post", post.id, -1), method: :post, form: { style: "display:inline-block;margin-right:4px;" } %>
+              <strong><%= post.score %></strong>
             </div>
 
             <div style="font-size: 0.9rem; color: #555;">

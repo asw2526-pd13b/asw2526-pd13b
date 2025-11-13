@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  # Devise per OAuth
+
   devise_for :users,
     controllers: {
       omniauth_callbacks: 'users/omniauth_callbacks',
@@ -7,12 +7,13 @@ Rails.application.routes.draw do
     },
     skip: [:registrations, :passwords, :confirmations]
 
-  # Ruta de logout explícita ABANS de resources :users
+
   devise_scope :user do
     delete '/sign_out', to: 'devise/sessions#destroy', as: :destroy_user_session
   end
 
-  # Resources - users VA DESPRÉS
+  post "/vote/:type/:id/:value", to: "votes#vote", as: :vote
+
   resources :communities do
     post   :subscribe,   on: :member
     delete :unsubscribe, on: :member
@@ -21,7 +22,7 @@ Rails.application.routes.draw do
   resources :users, only: [:index, :show, :edit, :update]
 
   resources :posts do
-    resources :comments, only: [:create]
+    resources :comments, only: [:create]  # crear comentario asociado a post
   end
 
   resources :comments, only: [:destroy]
