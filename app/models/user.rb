@@ -1,7 +1,6 @@
 class User < ApplicationRecord
   devise :omniauthable, :trackable, omniauth_providers: [:github]
 
-  # Associacions
   has_many :posts, dependent: :destroy
   has_many :comments, dependent: :destroy
   has_many :subscriptions, dependent: :destroy
@@ -11,19 +10,27 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true
 
   def self.from_omniauth(auth)
-    where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
-      user.email = auth.info.email
-      user.username = auth.info.nickname
+    email = auth.info.email
+    email = "#{auth.uid}@github.local" if email.blank?
+    username = auth.info.nickname
+    username = auth.info.name if username.blank?
+    username = "user_#{auth.uid}" if username.blank?
+
+    user = where(provider: auth.provider, uid: auth.uid).first_or_initialize
+    user.email = email
+    user.username = username
+    if user.display_name.blank? && auth.info.name.present?
       user.display_name = auth.info.name
+    end
+    if auth.info.image.present?
       user.avatar_url = auth.info.image
     end
+    user.save!
+    user
+  rescue ActiveRecord::RecordInvalid
+    nil
   end
 
-  def password_required?
-    false
-  end
-
-  # Mètodes auxiliars per al perfil
   def posts_count
     posts.count
   end

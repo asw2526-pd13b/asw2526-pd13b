@@ -318,6 +318,7 @@ PLATFORMS
 DEPENDENCIES
   debug
   devise
+  dotenv (~> 3.1)
   dotenv-rails
   image_processing (~> 1.2)
   omniauth

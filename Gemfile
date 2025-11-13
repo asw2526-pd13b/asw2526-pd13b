@@ -32,3 +32,4 @@ end
 group :production do
   gem "pg"
 end
+gem "dotenv", "~> 3.1"

@@ -1,21 +1,20 @@
 Rails.application.routes.draw do
-  # Devise per OAuth
   devise_for :users,
-    controllers: {
-      omniauth_callbacks: 'users/omniauth_callbacks',
-      sessions: 'devise/sessions'
-    },
-    skip: [:registrations, :passwords, :confirmations]
+             controllers: {
+               omniauth_callbacks: "users/omniauth_callbacks",
+               sessions: "devise/sessions"
+             },
+             skip: [:registrations, :passwords, :confirmations]
 
-  # Ruta de logout explícita ABANS de resources :users
   devise_scope :user do
-    delete '/sign_out', to: 'devise/sessions#destroy', as: :destroy_user_session
+    delete "/sign_out", to: "devise/sessions#destroy", as: :destroy_user_session
   end
 
-  # Resources - users VA DESPRÉS
   resources :communities do
-    post   :subscribe,   on: :member
-    delete :unsubscribe, on: :member
+    member do
+      post :subscribe
+      delete :unsubscribe
+    end
   end
 
   resources :users, only: [:index, :show, :edit, :update]
