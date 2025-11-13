@@ -1,68 +1,54 @@
-class CommunitiesController < ApplicationController
-  before_action :set_community, only: %i[ show edit update destroy ]
-  before_action :require_login
+class PostsController < ApplicationController
+  before_action :set_post, only: %i[ show edit update destroy ]
+  before_action :require_login, only: %i[ new create edit update destroy ]
 
   def index
-    case params[:filter]
-    when "subscribed"
-      @communities = current_user.subscribed_communities.order(:slug)
-    else # "local"
-      @communities = Community.order(:slug)
-    end
+    @posts = Post.includes(:user, :community).order(created_at: :desc) # más nuevo primero
   end
 
   def show
   end
 
   def new
-    @community = Community.new
-  end
-
-  def edit
+    @post = Post.new
+    @communities = Community.order(:slug)  # 🔥 cargar comunidades para el selector
   end
 
   def create
-    @community = Community.new(community_params)
-    if @community.save
-      redirect_to @community, notice: "Community creada."
+    @post = current_user.posts.build(post_params)
+    if @post.save
+      redirect_to posts_path, notice: "Post creado correctamente."
     else
+      @communities = Community.order(:slug) # recargar comunidades si hay error
       render :new, status: :unprocessable_entity
     end
   end
 
+  def edit
+    @communities = Community.order(:slug)
+  end
+
   def update
-    if @community.update(community_params)
-      redirect_to @community, notice: "Community actualizada."
+    if @post.update(post_params)
+      redirect_to @post, notice: "Post actualizado."
     else
+      @communities = Community.order(:slug)
       render :edit, status: :unprocessable_entity
     end
   end
 
   def destroy
-    @community.destroy
-    redirect_to communities_url, notice: "Community eliminada."
-  end
-
-  # ----- Suscripciones -----
-  def subscribe
-    community = Community.find_by!(slug: params[:id])
-    current_user.subscriptions.find_or_create_by!(community: community)
-    redirect_back fallback_location: community_path(community)
-  end
-
-  def unsubscribe
-    community = Community.find_by!(slug: params[:id])
-    current_user.subscriptions.where(community: community).delete_all
-    redirect_back fallback_location: community_path(community)
+    @post.destroy
+    redirect_to posts_url, notice: "Post eliminado."
   end
 
   private
 
-  def set_community
-    @community = Community.find_by!(slug: params[:id])
+  def set_post
+    @post = Post.find(params[:id])
   end
 
-  def community_params
-    params.require(:community).permit(:slug, :name, :banner, :avatar)
+  def post_params
+    params.require(:post).permit(:title, :url, :body, :community_id, :image)  # 🔥 ahora community_id
   end
 end
