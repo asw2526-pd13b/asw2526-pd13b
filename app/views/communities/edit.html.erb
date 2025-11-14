@@ -1,3 +1,10 @@
-<h1>Edit Community</h1>
-<%= render "form", community: @community %>
-<p><%= link_to "Back", community_path(@community) %></p>
+<div class="container-lg">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <h1 class="h4">Editar Comunitat</h1>
+      <%= render "form", community: @community %>
+      <hr>
+      <%= link_to "Tornar", community_path(@community), class: "btn btn-outline-secondary" %>
+    </div>
+  </div>
+</div>

@@ -1,36 +1,77 @@
-<h1>Communities</h1>
+<%# embolcallem tot en l'estructura de l'HTML original %>
+<div tabIndex="-1">
+  <div class="communities container-lg">
+    <div>
+      <h1 class="h4 mb-4">Llista de comunitats</h1>
 
-<p>
-  <%= link_to "Local", communities_path %> |
-  <%= link_to "Subscrit", communities_path(filter: :subscribed) %> |
-  <%= link_to "New Community", new_community_path %>
-</p>
+      <div class="row g-3 align-items-center mb-3">
+        <div class="col-auto">
+          <div class="listing-type-select btn-group btn-group-toggle flex-wrap" role="group">
+            <%# Filtres. Cal el .permit() per evitar l'error de UnfilteredParameters %>
+            <%= link_to "Subscrit", communities_path(params.permit(:q, :sort).to_h.merge(filter: "subscribed")),
+                  class: "btn btn-outline-secondary #{'active' if params[:filter] == 'subscribed'} #{'disabled' unless user_signed_in?}",
+                  title: "Mostra les comunitats a les quals estàs subscrit" %>
+            <%= link_to "Local", communities_path(params.permit(:q, :sort).to_h.merge(filter: "local")),
+                  class: "btn btn-outline-secondary #{'active' if params[:filter] == 'local' || params[:filter].nil?}",
+                  title: "Mostra únicament comunitats locals" %>
+          </div>
+        </div>
+        <div class="col-auto">
+          <%= link_to "Nova Comunitat", new_community_path, class: "btn btn-primary" %>
+        </div>
+      </div>
 
-<table>
-  <thead>
-    <tr>
-      <th>Nom</th>
-      <th># Subscriptors</th>
-      <th># Publicacions</th>
-      <th># Comentaris</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @communities.each do |c| %>
-      <tr>
-        <td><%= link_to (c.name.presence || c.slug), community_path(c) %></td>
-        <td><%= c.subscribers.count %></td>
-        <td><%= c.posts.count %></td>
-        <td><%= Comment.joins(:post).where(posts: { community_id: c.id }).count rescue 0 %></td>
-        <td>
-          <% if current_user.subscribed_communities.exists?(c.id) %>
-            <%= button_to "Donar de baixa", unsubscribe_community_path(c), method: :delete %>
-          <% else %>
-            <%= button_to "Subscriure", subscribe_community_path(c), method: :post %>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-sm table-hover" id="community_table">
+        <thead class="pointer">
+          <tr>
+            <th>Nom</th>
+            <th class="text-end">Subscriptors</th>
+            <th class="text-end">Publicacions</th>
+            <th class="text-end">Comentaris</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <% @communities.each do |c| %>
+            <tr>
+              <td>
+                <%= link_to community_path(c), class: "community-link", title: c.name do %>
+                  <% if c.avatar.attached? %>
+                    <%= image_tag c.avatar.variant(resize_to_fill: [24, 24]),
+                          class: "overflow-hidden pictrs-image object-fit-cover img-icon me-1" %>
+                  <% end %>
+                  <span class="overflow-wrap-anywhere"><%= c.name.presence || c.slug %></span>
+                <% end %>
+              </td>
+
+              <td class="text-end"><%= number_to_human c.subscribers.count, precision: 2, significant: false, units: { thousand: 'K' } %></td>
+              <td class="text-end"><%= number_to_human c.posts.count, precision: 2, significant: false, units: { thousand: 'K' } %></td>
+              <td class="text-end">
+                <%= number_to_human Comment.joins(:post).where(posts: { community_id: c.id }).count,
+                      precision: 2, significant: false, units: { thousand: 'K' } %>
+              </td>
+
+              <td class="text-end">
+                <% if user_signed_in? %>
+                  <% if current_user.subscribed_communities.exists?(c.id) %>
+                    <%= button_to unsubscribe_community_path(c), method: :delete, class: "btn btn-link d-inline-block p-1" do %>
+                      <svg class="icon icon-inline me-1"><use xlink:href="<%= asset_path('symbols.svg') %>#icon-check"></use></svg>Unit
+                    <% end %>
+                  <% else %>
+                    <%= button_to subscribe_community_path(c), method: :post, class: "btn btn-primary d-inline-block btn-sm py-0" do %>
+                      <svg class="icon icon-inline me-1"><use xlink:href="<%= asset_path('symbols.svg') %>#icon-add"></use></svg>Subscriure's
+                    <% end %>
+                  <% end %>
+                <% end %>
+              </td>
+
+            </tr>
           <% end %>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
