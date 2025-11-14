@@ -23,10 +23,14 @@
 
               <div class="col-auto">
                 <div class="listing-type-select btn-group btn-group-toggle flex-wrap" role="group">
-                  <%= link_to "Subscrit", posts_path(params.merge(filter: "subscribed")),
+                  <%# CORRECTE %>
+                  <%# Permetem explícitament :q (cerca) i :sort (ordre) abans de fer el merge %>
+
+                  <%= link_to "Subscrit", posts_path(params.permit(:q, :sort).to_h.merge(filter: "subscribed")),
                         class: "btn btn-outline-secondary #{'active' if params[:filter] == 'subscribed'} #{'disabled' unless user_signed_in?}",
                         title: "Mostra les comunitats a les quals estàs subscrit" %>
-                  <%= link_to "Local", posts_path(params.merge(filter: "local")),
+
+                  <%= link_to "Local", posts_path(params.permit(:q, :sort).to_h.merge(filter: "local")),
                         class: "btn btn-outline-secondary #{'active' if params[:filter] == 'local' || params[:filter].nil?}",
                         title: "Mostra únicament comunitats locals" %>
                 </div>
