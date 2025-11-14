@@ -1,12 +1,17 @@
-<% content_for :title, "Editing post" %>
+<% content_for :title, "Editant publicació" %>
 
-<h1>Editing post</h1>
+<div class="edit-post container-lg">
+  <div class="row">
+    <div class="col-12 col-lg-6 offset-lg-3 mb-4">
 
-<%= render "form", post: @post %>
+      <h1 class="h4 mb-4">Editant publicació</h1>
 
-<br>
+      <%= render "form", post: @post %>
 
-<div>
-  <%= link_to "Show this post", @post %> |
-  <%= link_to "Back to posts", posts_path %>
+      <hr>
+      <%= link_to "Mostrar", @post, class: "btn btn-outline-secondary btn-sm" %>
+      <%= link_to "Tornar a Posts", posts_path, class: "btn btn-outline-secondary btn-sm" %>
+
+    </div>
+  </div>
 </div>

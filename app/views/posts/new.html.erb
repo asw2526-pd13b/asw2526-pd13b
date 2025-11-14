@@ -1,3 +1,16 @@
-<h1>Create Post</h1>
-<%= render "form", post: @post %>
-<p><%= link_to "Back to Posts", posts_path %></p>
+<% content_for :title, "Crear Publicació" %>
+
+<div class="create-post container-lg">
+  <div class="row">
+    <div class="col-12 col-lg-6 offset-lg-3 mb-4">
+
+      <h1 class="h4 mb-4">Crear una publicació</h1>
+
+      <%= render "form", post: @post %>
+
+      <hr>
+      <%= link_to "Tornar a Posts", posts_path, class: "btn btn-outline-secondary btn-sm" %>
+
+    </div>
+  </div>
+</div>
