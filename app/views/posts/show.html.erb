@@ -1,5 +1,6 @@
 <h1><%= @post.title %></h1>
 
+
 <!-- VOTOS DEL POST -->
 <div style="display:flex; align-items:center; gap:6px; margin:6px 0;">
   <%= button_to "+", vote_path("Post", @post.id, 1), method: :post,
