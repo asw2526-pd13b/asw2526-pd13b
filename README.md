@@ -1,12 +1,12 @@
-## Lab Session #04
+Projecte 1
 
-Students:
+deploy funcionalitats: https://waslab04-3y91.onrender.com/
+deploy look and feel (falten funcionalitats): https://waslab04-bh2n.onrender.com/
+taiga: https://tree.taiga.io/project/ikerexposito-asw2526q1-pd13b/timeline
 
-* Surname_1, First_name_1
-
-* Surname_2, First_name_2
-
-Your deployed webapp at Render|Heroku|... (task #6): <https://*********.***.***/>
-
-
-estic fent el login
+membres:
+· Adrià Ortiz Burruezo
+· Xavier Monente Serra
+· Iker Expósito González
+· Martí Constans Codinachs
+· Nathaniel Cruz Pascual
