@@ -1,6 +1,6 @@
 <%= form_with(model: community, local: true, html: { multipart: true }) do |form| %>
   <% if community.errors.any? %>
-    <div id="error_explanation">
+    <div id="error_explanation" class="alert alert-danger">
       <h2><%= pluralize(community.errors.count, "error") %> impidieron guardar la comunidad:</h2>
       <ul>
         <% community.errors.full_messages.each do |message| %>
@@ -10,28 +10,28 @@
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :slug, "id (obligatorio)" %><br>
-    <%= form.text_field :slug, required: true, placeholder: "p.ej. programming" %>
-    <p style="font-size:0.9rem;color:#666;">Sólo minúsculas, números y guiones.</p>
+  <div class="mb-3">
+    <%= form.label :slug, "id (obligatorio)", class: "form-label" %><br>
+    <%= form.text_field :slug, required: true, placeholder: "p.ej. programming", class: "form-control" %>
+    <div class="form-text">Només minúscules, números i guions.</div>
   </div>
 
-  <div>
-    <%= form.label :name, "Nombre (opcional)" %><br>
-    <%= form.text_field :name %>
+  <div class="mb-3">
+    <%= form.label :name, "Nombre (opcional)", class: "form-label" %><br>
+    <%= form.text_field :name, class: "form-control" %>
   </div>
 
-  <div>
-    <%= form.label :avatar, "Avatar (opcional)" %><br>
-    <%= form.file_field :avatar, accept: "image/" %>
+  <div class="mb-3">
+    <%= form.label :avatar, "Avatar (opcional)", class: "form-label" %><br>
+    <%= form.file_field :avatar, accept: "image/*", class: "form-control" %>
   </div>
 
-  <div>
-    <%= form.label :banner, "Banner (opcional)" %><br>
-    <%= form.file_field :banner, accept: "image/" %>
+  <div class="mb-3">
+    <%= form.label :banner, "Banner (opcional)", class: "form-label" %><br>
+    <%= form.file_field :banner, accept: "image/*", class: "form-control" %>
   </div>
 
-  <div style="margin-top:1rem;">
-    <%= form.submit %>
+  <div class="mt-4">
+    <%= form.submit "Desar Comunitat", class: "btn btn-primary" %>
   </div>
 <% end %>

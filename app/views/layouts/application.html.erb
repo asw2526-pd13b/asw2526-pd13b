@@ -14,31 +14,91 @@
     <%= stylesheet_link_tag :app %>
   </head>
   <body>
-    <header>
-      <nav style="padding: 1rem; background: #f5f5f5; margin-bottom: 2rem;">
-        <%= link_to "programming.dev", posts_path,
-            style: "font-weight: bold; text-decoration: none; color: black; font-size: 1.2em;" %>
-      </nav>
-      <div style="float: right;">
-        <% if user_signed_in? %>
-          <%= link_to current_user.username, user_path(current_user), style: "margin-right: 1rem; text-decoration: none; color: #0079d3; font-weight: bold;" %>
-          <%= button_to "Logout", destroy_user_session_path, method: :delete,
-          style: "margin-left: 1rem; display: inline; padding: 0; border: none; background: none; color: #0066cc; text-decoration: underline; cursor: pointer; font-size: 1em;" %>
-        <% else %>
-          <%= button_to "Sign in with GitHub", user_github_omniauth_authorize_path, method: :post, data: { turbo: false } %>
-        <% end %>
+    <div id='root'>
+      <div>
+        <div class="shadow-sm">
+          <nav class="navbar navbar-expand-md navbar-light p-0 px-3 container-lg" id="navbar">
+            <%= link_to "programming.dev", posts_path,
+              class: "d-flex align-items-center navbar-brand me-md-3 active",
+              aria: { current: "true" },
+              id: "navTitle",
+              title: "A collection of programming communities" %>
+            <div class="collapse navbar-collapse my-2" id="navbarDropdown">
+              <ul class="me-auto navbar-nav" id="navbarLinks">
+                <li class="nav-item">
+                  <%= link_to "Comunitats", communities_path, class: "nav-link", title: "Comunitats" %>
+                </li>
+                <li class="nav-item">
+                  <%= link_to "Crear una publicació", new_post_path, class: "nav-link", title: "Crear una publicació" %>
+                </li>
+                <li class="nav-item">
+                  <%= link_to "Crea una comunitat", new_community_path, class: "nav-link", title: "Crea una comunitat" %>
+                </li>
+              </ul>
+
+              <ul class="navbar-nav" id="navbarIcons">
+                <%# Substitueix el teu antic <li class="nav-item" id="navSearch">...</li> per aquest %>
+                <li class="nav-item" id="navSearch">
+
+                  <%# Utilitzem el teu formulari que envia a posts_path %>
+                  <%= form_with url: posts_path, method: :get, local: true, class: "d-flex" do |f| %>
+
+                    <%#
+                      Utilitzem f.text_field en lloc de text_field_tag
+                      perquè està dins d'un bloc form_with.
+                    %>
+                    <%= f.text_field :q,
+                          value: params[:q],
+                          class: "form-control form-control-sm me-2",
+                          placeholder: "Cercar posts..." %>
+
+                    <%#
+                      Fem un botó de submit que només contingui la icona
+                      i utilitzem btn-outline-secondary per quadrar amb l'estil.
+                    %>
+                    <button type="submit" class="btn btn-outline-secondary btn-sm" title="Cercar">
+                      <svg class="icon">
+                        <use xlink:href="<%= asset_path('symbols.svg') %>#icon-search"></use>
+                        <div class="visually-hidden"><title>search</title></div>
+                      </svg>
+                    </button>
+
+                  <% end %>
+                </li>
+
+                <% if user_signed_in? %>
+                  <li class="nav-item">
+                    <%= link_to current_user.username, user_path(current_user), class: "nav-link" %>
+                  </li>
+                  <li class="nav-item">
+                    <%# Per fer logout en una navbar, és més net un link_to amb turbo_method que un button_to %>
+                    <%= link_to "Logout", destroy_user_session_path, data: { turbo_method: :delete }, class: "nav-link" %>
+                  </li>
+                <% else %>
+                  <li class="nav-item">
+                    <%# Aquest botó manté la teva lògica de 'Sign in' %>
+                    <%= button_to "Sign in with GitHub", user_github_omniauth_authorize_path,
+                          method: :post,
+                          data: { turbo: false },
+                          class: "btn btn-primary btn-sm" %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+          </nav>
+        </div>
+        <main class="mt-4 p-0 fl-1">
+          <% if notice %>
+            <p style="background:#e6f4ea; border:1px solid #a8e6a2; padding:8px; border-radius:6px; color:#1b5e20;">
+              <%= notice %>
+            </p>
+          <% end %>
+          <% if alert %>
+            <p style="color: red;"><%= alert %></p>
+          <% end %>
+          <%= yield %>
+        </main>
       </div>
-    </header>
-    <main style="padding: 0 2rem;">
-      <% if notice %>
-        <p style="background:#e6f4ea; border:1px solid #a8e6a2; padding:8px; border-radius:6px; color:#1b5e20;">
-          <%= notice %>
-        </p>
-      <% end %>
-      <% if alert %>
-        <p style="color: red;"><%= alert %></p>
-      <% end %>
-      <%= yield %>
-    </main>
+    </div>
   </body>
 </html>

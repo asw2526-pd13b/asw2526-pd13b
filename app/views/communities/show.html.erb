@@ -1,32 +1,110 @@
-<h1><%= @community.name.presence || @community.slug %></h1>
-<p><strong>id:</strong> <%= @community.slug %></p>
+<div tabIndex="-1">
+  <div class="community container-lg">
+    <div class="row">
 
-<% if @community.banner.attached? %>
-  <div><%= image_tag @community.banner, style: "max-width:100%;height:auto;" %></div>
-<% end %>
+      <div class="col-12 col-md-8 col-lg-9">
 
-<% if @community.avatar.attached? %>
-  <div style="margin-top:8px;"><%= image_tag @community.avatar, style: "width:96px;height:96px;object-fit:cover;border-radius:8px;" %></div>
-<% end %>
+        <div class="mb-2">
+          <div class="banner-icon-header position-relative mb-2">
+            <% if @community.banner.attached? %>
+              <%= image_tag @community.banner,
+                    class: "overflow-hidden pictrs-image img-fluid banner img-expanded slight-radius" %>
+            <% else %>
+              <div class="banner-placeholder" style="height: 150px; background-color: #eee;"></div>
+            <% end %>
 
-<p style="margin-top: 10px;">
-  <% if current_user.subscribed_communities.exists?(@community.id) %>
-    <%= button_to "Donar de baixa", unsubscribe_community_path(@community), method: :delete %>
-  <% else %>
-    <%= button_to "Subscriure", subscribe_community_path(@community), method: :post %>
-  <% end %>
-</p>
+            <% if @community.avatar.attached? %>
+              <%= image_tag @community.avatar.variant(resize_to_fill: [96, 96]),
+                    class: "overflow-hidden pictrs-image img-expanded slight-radius ms-2 mb-0 rounded-circle object-fit-cover avatar-overlay avatar-pushup" %>
+            <% end %>
+          </div>
+          <div>
+            <h1 class="h4 mb-0 overflow-wrap-anywhere d-inline" data-tippy-content="">
+              <%= @community.name.presence || @community.slug %>
+            </h1>
+          </div>
+          <%= link_to @community.slug, community_path(@community), class: "community-link text-muted" %>
+        </div>
 
-<h2>Posts</h2>
-<ul>
-  <% @community.posts.order(created_at: :desc).each do |p| %>
-    <li>
-      <strong><%= link_to p.title, p.url, target: "_blank", rel: "noopener" %></strong>
-      (<%= link_to "view", post_path(p) %>)
-    </li>
-  <% end %>
-</ul>
+        <div class="mb-3">
+          <span class="me-3">
+            <div class="data-type-select btn-group btn-group-toggle flex-wrap" role="group">
+              <input class="btn-check" id="btn-posts" type="radio" value="0" checked>
+              <label class="pointer btn btn-outline-secondary active" for="btn-posts">Publicacions</label>
+              <input class="btn-check" id="btn-comments" type="radio" value="1">
+              <label class="pointer btn btn-outline-secondary" for="btn-comments">Comentaris</label>
+            </div>
+          </span>
+          <span class="me-2">
+            <select class="sort-select form-select d-inline-block w-auto me-2" aria-label="Tipus d’ordenació">
+              <option value="Hot">Popular</option>
+              <option value="Active" selected>Actiu</option>
+              <option value="New">Nou</option>
+              <option value="Old">Antic</option>
+              </select>
+          </span>
+        </div>
 
-<p style="margin-top:1rem;">
-  <%= link_to "Back to communities", communities_path %>
-</p>
+        <div class="post-listings">
+          <% if @community.posts.any? %>
+            <% @community.posts.order(created_at: :desc).each do |post| %>
+              <%# Reutilitzem el partial de Posts que ja tenim! %>
+              <%= render 'posts/post', post: post %>
+              <hr class="my-3">
+            <% end %>
+          <% else %>
+            <div class="alert alert-info">Aquesta comunitat encara no té publicacions.</div>
+          <% end %>
+        </div>
+
+      </div><aside class="d-none d-md-block col-md-4 col-lg-3">
+        <div class="community-sidebar">
+          <aside class="mb-3">
+            <div id="sidebarContainer">
+
+              <section class="card border-secondary mb-3" id="sidebarMain">
+                <div class="card-body">
+                  <div>
+                    <h2 class="h5 mb-0">
+                      <%= link_to (@community.name.presence || @community.slug), community_path(@community), class: "community-link" %>
+                    </h2>
+                    <%= link_to @community.slug, community_path(@community), class: "community-link text-muted" %>
+                  </div>
+
+                  <div class="my-2">
+                    <% if user_signed_in? %>
+                      <% if current_user.subscribed_communities.exists?(@community.id) %>
+                        <%= button_to unsubscribe_community_path(@community), method: :delete, class: "btn d-block mb-2 w-100 btn-secondary" do %>
+                          <svg class="icon icon-inline me-1"><use xlink:href="<%= asset_path('symbols.svg') %>#icon-check"></use></svg>Unit
+                        <% end %>
+                      <% else %>
+                        <%= button_to subscribe_community_path(@community), method: :post, class: "btn d-block mb-2 w-100 btn-primary" do %>
+                          <svg class="icon icon-inline me-1"><use xlink:href="<%= asset_path('symbols.svg') %>#icon-plus"></use></svg>Subscriure's
+                        <% end %>
+                      <% end %>
+                    <% end %>
+                  </div>
+
+                  <%= link_to "Crea una publicació", new_post_path(community_id: @community.id), class: "btn btn-secondary d-block mb-2 w-100" %>
+                </div>
+              </section>
+
+              <section class="card border-secondary mb-3" id="sidebarInfo">
+                <div class="card-body">
+                  <ul class="badges my-1 list-inline">
+                    <li class="list-inline-item badge text-bg-secondary">
+                      <%= c.subscribers.count %> Subscriptors
+                    </li>
+                    <li class="list-inline-item badge text-bg-secondary">
+                      <%= c.posts.count %> Publicacions
+                    </li>
+                  </ul>
+                </div>
+              </section>
+
+              <%= link_to "Tornar a comunitats", communities_path, class: "btn btn-outline-secondary btn-sm mt-2" %>
+
+            </div>
+          </aside>
+        </div>
+      </aside> </div></div></div>

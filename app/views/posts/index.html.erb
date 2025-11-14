@@ -1,93 +1,82 @@
-<h1>Posts</h1>
-<!--  Cercador simple de posts -->
-<%= form_with url: posts_path, method: :get, local: true do %>
-  <div style="margin: 0 0 1rem 0;">
-    <%= label_tag :q, "Cercar:" %>
-    <%= text_field_tag :q, params[:q], placeholder: "Títol o cos...", style: "width:220px" %>
-    <%= submit_tag "Cerca" %>
-  </div>
-<% end %>
-<!--  Fi cercador -->
-<!--  Filtres -->
-<div style="margin: 0 0 1rem 0;">
-  <strong>Filtres:</strong>
-  <%= link_to "Tots", posts_path %> |
-  <%= link_to "Subscrit", posts_path(filter: "subscribed") %> |
-  <%= link_to "Local", posts_path(filter: "local") %>
-</div>
+<%# embolcallem tot en l'estructura de l'HTML original %>
+<div tabIndex="-1">
+  <div class="home container-lg">
+    <div class="row">
+      <div class="col-12 col-md-8 col-lg-9">
 
-<!-- Ordenació -->
-<div style="margin: 0 0 1rem 0;">
-  <strong>Ordenar per:</strong>
-  <%= link_to "Nou", posts_path(sort: "new",      filter: params[:filter], q: params[:q]) %> |
-  <%= link_to "Antic", posts_path(sort: "old",     filter: params[:filter], q: params[:q]) %> |
-  <%= link_to "Més comentaris", posts_path(sort: "comments", filter: params[:filter], q: params[:q]) %> |
-  <%= link_to "El millor", posts_path(sort: "top",    filter: params[:filter], q: params[:q]) %>
-</div>
-
-<p>
-  <%= link_to "Communities", communities_path %> |
-  <%= link_to "New Community", new_community_path %>
-</p>
-
-<p><%= link_to "Create Post", new_post_path %></p>
-
-<% if @posts.any? %>
-  <ul style="list-style:none; padding-left:0;">
-    <% @posts.each do |post| %>
-      <li style="margin: 16px 0; padding: 12px 0; border-bottom: 1px solid #ddd;">
-        <div style="display:flex; gap:12px; align-items:flex-start;">
-          <!-- Miniatura cuadrada -->
-          <% if post.image.attached? %>
-            <%= link_to post_path(post), style: "display:block; flex:0 0 auto;" do %>
-              <% if post.image.variable? %>
-                <%= image_tag post.image.variant(resize_to_fill: [96, 96]),
-                      style: "width:96px;height:96px;object-fit:cover;border-radius:8px;display:block;" %>
-              <% else %>
-                <%= image_tag post.image,
-                      style: "width:96px;height:96px;object-fit:cover;border-radius:8px;display:block;" %>
-              <% end %>
-            <% end %>
-          <% else %>
-            <!-- Placeholder si no hay imagen -->
-            <div style="width:96px;height:96px;border-radius:8px;background:#eee;flex:0 0 auto;"></div>
-          <% end %>
-
-          <!-- Contenido -->
-          <div style="min-width:0;">
-            <div>
-              <strong>
-                <%= link_to post.title, post.url, target: "_blank", rel: "noopener" %>
-              </strong>
-              <% if post.community.present? %>
-                <span>— <%= link_to post.community.slug, community_path(post.community) %></span>
-              <% else %>
-                <span>— (sin comunidad)</span>
-              <% end %>
+        <div class="d-block d-md-none">
+          <div class="row">
+            <div class="col-12">
+              <button class="btn btn-secondary d-inline-block mb-2 me-3">Barra lateral
+                <svg class="icon icon-inline">
+                  <use xlink:href="<%= asset_path('symbols.svg') %>#icon-plus-square"></use>
+                  <div class="visually-hidden"><title>plus-square</title></div>
+                </svg>
+              </button>
             </div>
-
-            <div style="display:flex; align-items:center; gap:6px; margin:6px 0;">
-              <%= button_to "+", vote_path("Post", post.id, 1), method: :post, form: { style: "display:inline-block;margin-right:4px;" } %>
-              <%= button_to "-", vote_path("Post", post.id, -1), method: :post, form: { style: "display:inline-block;margin-right:4px;" } %>
-              <strong><%= post.score %></strong>
-            </div>
-
-            <div style="font-size: 0.9rem; color: #555;">
-              by
-              <%= link_to post.user.display_name, user_path(post.user) %>
-              (@<%= post.user.username %>) ·
-              <%= time_ago_in_words(post.created_at) %> ago
-              · <%= link_to "view", post_path(post) %>
-            </div>
-
-            <% if post.body.present? %>
-              <p style="margin:8px 0 0 0;"><%= simple_format(post.body) %></p>
-            <% end %>
           </div>
         </div>
-      </li>
-    <% end %>
-  </ul>
-<% else %>
-  <p>No hay posts todavía.</p>
-<% end %>
+
+        <div class="main-content-wrapper">
+          <div>
+            <div class="row align-items-center mb-3 g-3">
+
+              <div class="col-auto">
+                <div class="listing-type-select btn-group btn-group-toggle flex-wrap" role="group">
+                  <%# CORRECTE %>
+                  <%# Permetem explícitament :q (cerca) i :sort (ordre) abans de fer el merge %>
+
+                  <%= link_to "Subscrit", posts_path(params.permit(:q, :sort).to_h.merge(filter: "subscribed")),
+                        class: "btn btn-outline-secondary #{'active' if params[:filter] == 'subscribed'} #{'disabled' unless user_signed_in?}",
+                        title: "Mostra les comunitats a les quals estàs subscrit" %>
+
+                  <%= link_to "Local", posts_path(params.permit(:q, :sort).to_h.merge(filter: "local")),
+                        class: "btn btn-outline-secondary #{'active' if params[:filter] == 'local' || params[:filter].nil?}",
+                        title: "Mostra únicament comunitats locals" %>
+                </div>
+              </div>
+
+              <div class="col-auto">
+                <%= form_with url: posts_path, method: :get, local: true, class: "d-inline" do |f| %>
+                  <%# Passem els altres paràmetres (cerca, filtre) perquè no es perdin en canviar l'ordre %>
+                  <%= hidden_field_tag :q, params[:q] if params[:q] %>
+                  <%= hidden_field_tag :filter, params[:filter] if params[:filter] %>
+
+                  <%= f.select :sort,
+                        options_for_select([
+                          ["Nou", "new"],
+                          ["Antic", "old"],
+                          ["Popular", "popular"]
+                        ], params[:sort]),
+                        { prompt: "Tipus d’ordenació" },
+                        { class: "form-select d-inline-block w-auto me-2",
+                          aria: { label: "Tipus d’ordenació" },
+                          onchange: 'this.form.submit()'
+                        } %>
+                <% end %>
+              </div>
+            </div> <div class="post-listings">
+              <% if @posts.any? %>
+                <% @posts.each do |post| %>
+                  <%# Cridem al fitxer partial _post.html.erb per cada post %>
+                  <%= render 'post', post: post %>
+                  <hr class="my-3">
+                <% end %>
+              <% else %>
+                <div class="alert alert-info" role="alert">
+                  No hay posts todavía.
+                </div>
+              <% end %>
+            </div>
+
+            <div class="paginator my-2">
+              <%# Aquí aniria el teu helper de paginació (ex: Pagy, Kaminari) %>
+              <button class="btn btn-secondary">Següent</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
