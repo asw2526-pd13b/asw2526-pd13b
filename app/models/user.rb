@@ -10,6 +10,10 @@ class User < ApplicationRecord
 
   validates :username, presence: true, uniqueness: true
   validates :email, presence: true, uniqueness: true
+  validates :api_key, uniqueness: true, allow_nil: true
+
+   # Generar API key abans de crear l'usuari
+  before_create :generate_api_key
 
   def self.from_omniauth(auth)
     where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
@@ -35,5 +39,23 @@ class User < ApplicationRecord
 
   def name
     display_name.presence || username
+  end
+
+  # Generar nova API key
+  def regenerate_api_key!
+    update(api_key: generate_unique_api_key)
+  end
+
+  private
+
+  def generate_api_key
+    self.api_key = generate_unique_api_key
+  end
+
+  def generate_unique_api_key
+    loop do
+      token = SecureRandom.hex(32)
+      break token unless User.exists?(api_key: token)
+    end
   end
 end

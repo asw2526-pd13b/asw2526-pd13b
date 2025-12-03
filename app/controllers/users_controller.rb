@@ -26,6 +26,14 @@ class UsersController < ApplicationController
     end
   end
 
+  def regenerate_api_key
+    @user = User.find(params[:id])
+    authorize_user!
+
+    @user.regenerate_api_key!
+    redirect_to @user, notice: "API Key regenerada correctament."
+  end
+
   private
 
   def set_user

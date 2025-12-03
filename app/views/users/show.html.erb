@@ -58,6 +58,25 @@
     </div>
   </div>
 
+  <!-- API KEY -->
+  <% if user_signed_in? && current_user == @user %>
+  <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
+    <strong>🔑 API Key (privada):</strong>
+    <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+      <code style="flex: 1; padding: 10px; background: white; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; word-break: break-all;">
+        <%= @user.api_key %>
+      </code>
+      <%= button_to "Regenerar", regenerate_api_key_user_path(@user),
+          method: :post,
+          data: { confirm: "Estàs segur? L'API key antiga deixarà de funcionar." },
+          style: "padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;" %>
+    </div>
+    <small style="color: #856404; display: block; margin-top: 10px;">
+      ⚠️ No comparteixis aquesta clau amb ningú. Úsala per accedir a l'API.
+    </small>
+  </div>
+<% end %>
+
   <!-- Tabs -->
   <div style="background: white; border: 1px solid #ddd; border-radius: 8px 8px 0 0; padding: 0;">
     <div style="display: flex; border-bottom: 2px solid #eee;">
