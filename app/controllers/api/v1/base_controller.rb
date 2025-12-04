@@ -1,58 +1,45 @@
 module Api
   module V1
-    class BaseController < ApplicationController
-      # Desactivar CSRF per l'API (usarem API keys)
-      skip_before_action :verify_authenticity_token
+    class BaseController < ActionController::API
+      before_action :authenticate_with_api_key!
 
-      # Resposta JSON per defecte
-      respond_to :json
+      rescue_from ActiveRecord::RecordNotFound do
+        render json: { error: "not_found" }, status: :not_found
+      end
 
-      # Gestió d'errors
-      rescue_from ActiveRecord::RecordNotFound, with: :not_found
-      rescue_from ActiveRecord::RecordInvalid, with: :unprocessable_entity
+      rescue_from ActionController::ParameterMissing do |e|
+        render json: { error: "bad_request", message: e.message }, status: :bad_request
+      end
+
+      rescue_from ActiveRecord::RecordInvalid do |e|
+        render json: { error: "unprocessable_entity", details: e.record.errors.to_hash(true) }, status: :unprocessable_entity
+      end
 
       private
 
-      # Autenticació amb API Key
-      def authenticate_api_key!
-        unless current_api_user
-          render json: { error: 'API Key missing or invalid' }, status: :unauthorized
+      attr_reader :current_user
+
+      def authenticate_with_api_key!
+        key = request.headers["X-API-Key"].presence || request.headers["X-Api-Key"].presence || params[:api_key].presence
+        user = key && User.find_by(api_key: key)
+        if user.nil?
+          render json: { error: "unauthorized" }, status: :unauthorized
+        else
+          @current_user = user
         end
       end
 
-      # Current user per l'API
-      def current_api_user
-        @current_user
+      def attachment_url(att)
+        return nil unless att&.attached?
+        Rails.application.routes.url_helpers.rails_blob_url(att, host: request.base_url)
       end
 
-      # Gestió d'errors 404
-      def not_found(exception)
-        render json: { error: exception.message }, status: :not_found
+      def render_unprocessable(record)
+        render json: { error: "unprocessable_entity", details: record.errors.to_hash(true) }, status: :unprocessable_entity
       end
 
-      # Gestió d'errors de validació
-      def unprocessable_entity(exception)
-        render json: {
-          error: 'Validation failed',
-          details: exception.record.errors.full_messages
-        }, status: :unprocessable_entity
-      end
-
-      # Verificar que l'usuari sigui el propietari del recurs
-      def authorize_owner!(resource)
-        unless resource.user_id == current_api_user.id
-          render json: { error: 'Unauthorized' }, status: :forbidden
-          return false
-        end
-        true
-      end
-
-      # Obtenir current_api_user sense requerir autenticació
-      def current_api_user
-        return @current_user if defined?(@current_user)
-
-        api_key = request.headers['X-API-Key']
-        @current_user = User.find_by(api_key: api_key) if api_key.present?
+      def render_forbidden
+        render json: { error: "forbidden" }, status: :forbidden
       end
     end
   end

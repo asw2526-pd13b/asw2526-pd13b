@@ -1,101 +1,89 @@
 module Api
   module V1
     class CommunitiesController < BaseController
-      before_action :authenticate_api_key!, except: [:index, :show]
-      before_action :set_community, only: [:show, :update, :destroy, :subscribe, :unsubscribe]
-
-      # GET /api/v1/communities
       def index
-        @communities = Community.all
-        render json: @communities.map { |c| community_json(c) }
+        communities =
+          case params[:filter]
+          when "subscribed"
+            current_user.subscribed_communities.order(:slug)
+          else
+            Community.order(:slug)
+          end
+
+        render json: communities.map { |c| serialize_community(c) }
       end
 
-      # GET /api/v1/communities/:id
       def show
-        render json: community_json(@community, detailed: true)
+        community = Community.find_by!(slug: params[:id])
+        posts = community.posts.includes(:user).order(created_at: :desc).limit(20)
+        render json: { community: serialize_community(community), posts: posts.map { |p| serialize_post_summary(p) } }
       end
 
-      # POST /api/v1/communities
       def create
-        @community = Community.new(community_params)
-
-        if @community.save
-          render json: community_json(@community), status: :created
+        community = Community.new(community_params)
+        if community.save
+          render json: { community: serialize_community(community) }, status: :created
         else
-          render json: {
-            error: 'Validation failed',
-            details: @community.errors.full_messages
-          }, status: :unprocessable_entity
+          render_unprocessable(community)
         end
       end
 
-      # PUT/PATCH /api/v1/communities/:id
       def update
-        if @community.update(community_params)
-          render json: community_json(@community)
+        community = Community.find_by!(slug: params[:id])
+        if community.update(community_params)
+          render json: { community: serialize_community(community) }
         else
-          render json: {
-            error: 'Validation failed',
-            details: @community.errors.full_messages
-          }, status: :unprocessable_entity
+          render_unprocessable(community)
         end
       end
 
-      # DELETE /api/v1/communities/:id
       def destroy
-        @community.destroy
+        community = Community.find_by!(slug: params[:id])
+        community.destroy
         head :no_content
       end
 
-      # POST /api/v1/communities/:id/subscribe
       def subscribe
-        subscription = current_api_user.subscriptions.find_or_create_by(community: @community)
-
-        if subscription.persisted?
-          render json: { message: 'Subscribed successfully' }, status: :ok
-        else
-          render json: { error: 'Could not subscribe' }, status: :unprocessable_entity
-        end
+        community = Community.find_by!(slug: params[:id])
+        current_user.subscriptions.find_or_create_by!(community: community)
+        render json: { subscribed: true, community: serialize_community(community) }
       end
 
-      # DELETE /api/v1/communities/:id/unsubscribe
       def unsubscribe
-        subscription = current_api_user.subscriptions.find_by(community: @community)
-
-        if subscription&.destroy
-          render json: { message: 'Unsubscribed successfully' }, status: :ok
-        else
-          render json: { error: 'Not subscribed' }, status: :not_found
-        end
+        community = Community.find_by!(slug: params[:id])
+        current_user.subscriptions.where(community: community).delete_all
+        render json: { subscribed: false, community: serialize_community(community) }
       end
 
       private
 
-      def set_community
-        @community = Community.find(params[:id])
-      end
-
       def community_params
-        params.require(:community).permit(:slug, :name)
+        params.permit(:slug, :name, :banner, :avatar)
       end
 
-      def community_json(community, detailed: false)
-        json = {
+      def serialize_community(community)
+        {
           id: community.id,
           slug: community.slug,
           name: community.name,
+          avatar_url: attachment_url(community.avatar),
+          banner_url: attachment_url(community.banner),
+          subscribers_count: community.subscribers.count,
           created_at: community.created_at,
           updated_at: community.updated_at
         }
+      end
 
-        if detailed
-          json.merge!(
-            posts_count: community.posts.count,
-            subscribers_count: community.subscriptions.count
-          )
-        end
-
-        json
+      def serialize_post_summary(post)
+        {
+          id: post.id,
+          title: post.title,
+          url: post.url,
+          body: post.body,
+          user: { id: post.user.id, username: post.user.username, name: post.user.name, avatar_url: post.user.avatar_url },
+          score: post.score,
+          created_at: post.created_at
+        }
       end
     end
   end

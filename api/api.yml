@@ -1,0 +1,627 @@
+openapi: 3.0.3
+info:
+  title: ASW PD13B API
+  version: "1.0.0"
+servers:
+  - url: https://waslab04-3y91.onrender.com
+  - url: http://localhost:3000
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+    User:
+      type: object
+      properties:
+        id: { type: integer }
+        username: { type: string }
+        display_name: { type: string, nullable: true }
+        name: { type: string }
+        email: { type: string }
+        avatar_url: { type: string, nullable: true }
+        banner_url: { type: string, nullable: true }
+        bio: { type: string, nullable: true }
+        posts_count: { type: integer }
+        comments_count: { type: integer }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    Community:
+      type: object
+      properties:
+        id: { type: integer }
+        slug: { type: string }
+        name: { type: string }
+        avatar_url: { type: string, nullable: true }
+        banner_url: { type: string, nullable: true }
+        subscribers_count: { type: integer }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    Post:
+      type: object
+      properties:
+        id: { type: integer }
+        title: { type: string }
+        url: { type: string }
+        body: { type: string, nullable: true }
+        community_id: { type: integer }
+        user_id: { type: integer }
+        score: { type: integer }
+        image_url: { type: string, nullable: true }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    Comment:
+      type: object
+      properties:
+        id: { type: integer }
+        body: { type: string }
+        post_id: { type: integer }
+        user_id: { type: integer }
+        parent_id: { type: integer, nullable: true }
+        score: { type: integer }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    VoteResponse:
+      type: object
+      properties:
+        votable_type: { type: string }
+        votable_id: { type: integer }
+        upvoted: { type: boolean }
+        score: { type: integer }
+security:
+  - apiKeyAuth: []
+paths:
+  /api/v1/users:
+    get:
+      summary: List users
+      security:
+        - apiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/User" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /api/v1/users/{id}:
+    get:
+      summary: Get user
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: "#/components/schemas/User" }
+                  posts:
+                    type: array
+                    items: { $ref: "#/components/schemas/Post" }
+                  comments:
+                    type: array
+                    items: { $ref: "#/components/schemas/Comment" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    patch:
+      summary: Update own profile
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                display_name: { type: string, nullable: true }
+                bio: { type: string, nullable: true }
+                banner_url: { type: string, nullable: true }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: "#/components/schemas/User" }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422":
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /api/v1/communities:
+    get:
+      summary: List communities
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+            enum: [local, subscribed]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Community" }
+    post:
+      summary: Create community
+      security:
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [slug, name]
+              properties:
+                slug: { type: string }
+                name: { type: string }
+          multipart/form-data:
+            schema:
+              type: object
+              required: [slug, name]
+              properties:
+                slug: { type: string }
+                name: { type: string }
+                avatar: { type: string, format: binary }
+                banner: { type: string, format: binary }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  community: { $ref: "#/components/schemas/Community" }
+        "422":
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /api/v1/communities/{slug}:
+    get:
+      summary: Get community
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  community: { $ref: "#/components/schemas/Community" }
+                  posts:
+                    type: array
+                    items: { $ref: "#/components/schemas/Post" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    patch:
+      summary: Update community
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                slug: { type: string }
+                name: { type: string }
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                slug: { type: string }
+                name: { type: string }
+                avatar: { type: string, format: binary }
+                banner: { type: string, format: binary }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  community: { $ref: "#/components/schemas/Community" }
+        "422":
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    delete:
+      summary: Delete community
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        "204":
+          description: No content
+  /api/v1/communities/{slug}/subscribe:
+    post:
+      summary: Subscribe to community
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subscribed: { type: boolean }
+                  community: { $ref: "#/components/schemas/Community" }
+  /api/v1/communities/{slug}/unsubscribe:
+    delete:
+      summary: Unsubscribe from community
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  subscribed: { type: boolean }
+                  community: { $ref: "#/components/schemas/Community" }
+  /api/v1/posts:
+    get:
+      summary: List posts
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: query
+          name: q
+          required: false
+          schema: { type: string }
+        - in: query
+          name: filter
+          required: false
+          schema:
+            type: string
+            enum: [local, subscribed]
+        - in: query
+          name: sort
+          required: false
+          schema:
+            type: string
+            enum: [new, old, comments, top, popular]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Post" }
+    post:
+      summary: Create post
+      security:
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title, url, community_id]
+              properties:
+                title: { type: string }
+                url: { type: string }
+                body: { type: string, nullable: true }
+                community_id: { type: integer }
+          multipart/form-data:
+            schema:
+              type: object
+              required: [title, url, community_id]
+              properties:
+                title: { type: string }
+                url: { type: string }
+                body: { type: string, nullable: true }
+                community_id: { type: integer }
+                image: { type: string, format: binary }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  post: { $ref: "#/components/schemas/Post" }
+        "422":
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /api/v1/posts/{id}:
+    get:
+      summary: Get post (with comments)
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: comments_sort
+          required: false
+          schema:
+            type: string
+            enum: [new, old]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  post: { $ref: "#/components/schemas/Post" }
+                  comments:
+                    type: array
+                    items: { $ref: "#/components/schemas/Comment" }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    patch:
+      summary: Update own post
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                url: { type: string }
+                body: { type: string, nullable: true }
+                community_id: { type: integer }
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title: { type: string }
+                url: { type: string }
+                body: { type: string, nullable: true }
+                community_id: { type: integer }
+                image: { type: string, format: binary }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  post: { $ref: "#/components/schemas/Post" }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+        "422":
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    delete:
+      summary: Delete own post
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204": { description: No content }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /api/v1/posts/{post_id}/comments:
+    get:
+      summary: List comments for a post
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          schema: { type: integer }
+        - in: query
+          name: sort
+          required: false
+          schema:
+            type: string
+            enum: [new, old]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Comment" }
+    post:
+      summary: Create comment for a post
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [body]
+              properties:
+                body: { type: string }
+                parent_id: { type: integer, nullable: true }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comment: { $ref: "#/components/schemas/Comment" }
+        "422":
+          description: Unprocessable entity
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /api/v1/comments/{id}:
+    delete:
+      summary: Delete own comment
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204": { description: No content }
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /api/v1/votes:
+    post:
+      summary: Toggle upvote or remove vote
+      security:
+        - apiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [type, id, value]
+              properties:
+                type:
+                  type: string
+                  enum: [Post, Comment]
+                id: { type: integer }
+                value:
+                  type: integer
+                  enum: [1, -1]
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VoteResponse" }
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }

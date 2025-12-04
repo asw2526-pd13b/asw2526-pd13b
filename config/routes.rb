@@ -16,20 +16,16 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+      resources :users, only: [:index, :show, :update]
       resources :communities do
-        member do
-          post :subscribe
-          delete :unsubscribe
-        end
+        post :subscribe, on: :member
+        delete :unsubscribe, on: :member
       end
-
       resources :posts do
-        resources :comments, only: [:create]
+        resources :comments, only: [:index, :create]
       end
-
-      resources :comments, only: [:update, :destroy]
-
-      resources :votes, only: [:create, :destroy]
+      resources :comments, only: [:destroy]
+      resources :votes, only: [:create]
     end
   end
 
@@ -45,12 +41,6 @@ Rails.application.routes.draw do
   end
 
   resources :comments, only: [:destroy]
-
-  resources :users, only: [:index, :show, :edit, :update] do
-    member do
-      post :regenerate_api_key
-    end
-  end
 
   get "up" => "rails/health#show", as: :rails_health_check
 
