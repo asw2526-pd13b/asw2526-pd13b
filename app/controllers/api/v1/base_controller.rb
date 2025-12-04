@@ -15,17 +15,8 @@ module Api
 
       # Autenticació amb API Key
       def authenticate_api_key!
-        api_key = request.headers['X-API-Key']
-
-        unless api_key.present?
-          render json: { error: 'API Key missing' }, status: :unauthorized
-          return
-        end
-
-        @current_user = User.find_by(api_key: api_key)
-
-        unless @current_user
-          render json: { error: 'Invalid API Key' }, status: :unauthorized
+        unless current_api_user
+          render json: { error: 'API Key missing or invalid' }, status: :unauthorized
         end
       end
 
@@ -54,6 +45,14 @@ module Api
           return false
         end
         true
+      end
+
+      # Obtenir current_api_user sense requerir autenticació
+      def current_api_user
+        return @current_user if defined?(@current_user)
+
+        api_key = request.headers['X-API-Key']
+        @current_user = User.find_by(api_key: api_key) if api_key.present?
       end
     end
   end

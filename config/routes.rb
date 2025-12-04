@@ -28,6 +28,8 @@ Rails.application.routes.draw do
       end
 
       resources :comments, only: [:update, :destroy]
+
+      resources :votes, only: [:create, :destroy]
     end
   end
 

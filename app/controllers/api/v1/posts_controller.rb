@@ -88,6 +88,11 @@ module Api
           }
         }
 
+        if current_api_user
+          user_vote = post.votes.find_by(user: current_api_user)
+          json[:user_vote] = user_vote&.value
+        end
+
         if detailed
           json.merge!(
             comments_count: post.comments.count,

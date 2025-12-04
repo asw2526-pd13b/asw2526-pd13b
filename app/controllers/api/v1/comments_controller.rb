@@ -67,6 +67,12 @@ module Api
             display_name: comment.user.display_name
           }
         }
+        # Afegir vot de l'usuari actual si està autenticat
+        if current_api_user
+          user_vote = comment.votes.find_by(user: current_api_user)
+          json[:user_vote] = user_vote&.value
+        end
+        json
       end
     end
   end
