@@ -1,93 +1,118 @@
-<h1>Posts</h1>
-<!--  Cercador simple de posts -->
-<%= form_with url: posts_path, method: :get, local: true do %>
-  <div style="margin: 0 0 1rem 0;">
-    <%= label_tag :q, "Cercar:" %>
-    <%= text_field_tag :q, params[:q], placeholder: "Títol o cos...", style: "width:220px" %>
-    <%= submit_tag "Cerca" %>
+<% content_for :title, "Posts" %>
+
+<div class="PageHeader">
+  <div>
+    <h1 class="PageTitle">Posts</h1>
   </div>
-<% end %>
-<!--  Fi cercador -->
-<!--  Filtres -->
-<div style="margin: 0 0 1rem 0;">
-  <strong>Filtres:</strong>
-  <%= link_to "Tots", posts_path %> |
-  <%= link_to "Subscrit", posts_path(filter: "subscribed") %> |
-  <%= link_to "Local", posts_path(filter: "local") %>
+  <div class="Pills">
+    <%= link_to "Create post", new_post_path, class: "btn btn-primary" %>
+  </div>
 </div>
 
-<!-- Ordenació -->
-<div style="margin: 0 0 1rem 0;">
-  <strong>Ordenar per:</strong>
-  <%= link_to "Nou", posts_path(sort: "new",      filter: params[:filter], q: params[:q]) %> |
-  <%= link_to "Antic", posts_path(sort: "old",     filter: params[:filter], q: params[:q]) %> |
-  <%= link_to "Més comentaris", posts_path(sort: "comments", filter: params[:filter], q: params[:q]) %> |
-  <%= link_to "El millor", posts_path(sort: "top",    filter: params[:filter], q: params[:q]) %>
+<div class="Card CardPad" style="box-shadow:none;">
+  <div class="Stack" style="gap:10px;">
+    <%= form_with url: posts_path, method: :get, local: true do %>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+        <label class="sr-only" for="q">Search</label>
+        <%= text_field_tag :q, params[:q], id: "q", class: "Input", placeholder: "Search by title or text…" %>
+        <% if params[:filter].present? %>
+          <%= hidden_field_tag :filter, params[:filter] %>
+        <% end %>
+        <% if params[:sort].present? %>
+          <%= hidden_field_tag :sort, params[:sort] %>
+        <% end %>
+        <%= submit_tag "Search", class: "btn" %>
+        <% if params[:q].present? %>
+          <%= link_to "Clear", posts_path(filter: params[:filter], sort: params[:sort]), class: "btn btn-ghost" %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;">
+      <div class="Pills">
+        <% filter = params[:filter].presence || "all" %>
+        <%= link_to "All", posts_path(sort: params[:sort], q: params[:q]), class: "pill #{'is-active' if filter == 'all'}" %>
+        <%= link_to "Subscribed", posts_path(filter: "subscribed", sort: params[:sort], q: params[:q]), class: "pill #{'is-active' if filter == 'subscribed'}" %>
+        <%= link_to "Local", posts_path(filter: "local", sort: params[:sort], q: params[:q]), class: "pill #{'is-active' if filter == 'local'}" %>
+      </div>
+
+      <div class="Pills">
+        <% sort = params[:sort].presence || "new" %>
+        <%= link_to "New", posts_path(sort: "new", filter: params[:filter], q: params[:q]), class: "pill #{'is-active' if sort == 'new'}" %>
+        <%= link_to "Old", posts_path(sort: "old", filter: params[:filter], q: params[:q]), class: "pill #{'is-active' if sort == 'old'}" %>
+        <%= link_to "Most comments", posts_path(sort: "comments", filter: params[:filter], q: params[:q]), class: "pill #{'is-active' if sort == 'comments'}" %>
+        <%= link_to "Top", posts_path(sort: "top", filter: params[:filter], q: params[:q]), class: "pill #{'is-active' if sort == 'top'}" %>
+      </div>
+    </div>
+  </div>
 </div>
-
-<p>
-  <%= link_to "Communities", communities_path %> |
-  <%= link_to "New Community", new_community_path %>
-</p>
-
-<p><%= link_to "Create Post", new_post_path %></p>
 
 <% if @posts.any? %>
-  <ul style="list-style:none; padding-left:0;">
+  <div class="Stack" style="margin-top:12px;">
     <% @posts.each do |post| %>
-      <li style="margin: 16px 0; padding: 12px 0; border-bottom: 1px solid #ddd;">
-        <div style="display:flex; gap:12px; align-items:flex-start;">
-          <!-- Miniatura cuadrada -->
+      <% vv = vote_value_for(post) %>
+      <article class="Card PostCard">
+        <div style="padding:14px 0 14px 14px;display:flex;align-items:flex-start;">
+          <div class="VoteStack">
+            <%= button_to vote_path("Post", post.id, 1), method: :post, class: "VoteBtn #{'is-upvoted' if vv == 1}", form: { class: "inline" } do %>↑<% end %>
+            <div class="VoteScore"><%= post.score %></div>
+            <%= button_to vote_path("Post", post.id, -1), method: :post, class: "VoteBtn #{'is-downvoted' if vv == -1}", form: { class: "inline" } do %>↓<% end %>
+          </div>
+        </div>
+
+        <div style="padding:14px 0 14px 0;">
           <% if post.image.attached? %>
-            <%= link_to post_path(post), style: "display:block; flex:0 0 auto;" do %>
+            <%= link_to post_path(post), style: "display:inline-block;" do %>
               <% if post.image.variable? %>
-                <%= image_tag post.image.variant(resize_to_fill: [96, 96]),
-                      style: "width:96px;height:96px;object-fit:cover;border-radius:8px;display:block;" %>
+                <%= image_tag post.image.variant(resize_to_fill: [96, 96]), class: "Thumb" %>
               <% else %>
-                <%= image_tag post.image,
-                      style: "width:96px;height:96px;object-fit:cover;border-radius:8px;display:block;" %>
+                <%= image_tag post.image, class: "Thumb" %>
               <% end %>
             <% end %>
           <% else %>
-            <!-- Placeholder si no hay imagen -->
-            <div style="width:96px;height:96px;border-radius:8px;background:#eee;flex:0 0 auto;"></div>
+            <div class="ThumbPlaceholder">∷</div>
+          <% end %>
+        </div>
+
+        <div style="padding:14px 14px 14px 0;min-width:0;">
+          <h2 class="PostTitle">
+            <% if post.url.present? %>
+              <%= link_to post.title, post.url, target: "_blank", rel: "noopener" %>
+            <% else %>
+              <%= link_to post.title, post_path(post) %>
+            <% end %>
+          </h2>
+
+          <div class="PostMeta">
+            <% if post.community.present? %>
+              <span class="Badge"><%= link_to "c/#{post.community.slug}", community_path(post.community) %></span>
+            <% else %>
+              <span class="Badge">no community</span>
+            <% end %>
+            <span>by <%= link_to post.user.display_name, user_path(post.user) %> (@<%= post.user.username %>)</span>
+            <span>· <%= time_ago_in_words(post.created_at) %> ago</span>
+            <span>· <%= (post.try(:comments_count) || post.comments.count) %> comments</span>
+          </div>
+
+          <% if post.body.present? %>
+            <div class="PostExcerpt"><%= truncate(post.body, length: 220) %></div>
           <% end %>
 
-          <!-- Contenido -->
-          <div style="min-width:0;">
-            <div>
-              <strong>
-                <%= link_to post.title, post.url, target: "_blank", rel: "noopener" %>
-              </strong>
-              <% if post.community.present? %>
-                <span>— <%= link_to post.community.slug, community_path(post.community) %></span>
-              <% else %>
-                <span>— (sin comunidad)</span>
+          <div class="PostFooter">
+            <div></div>
+            <div class="Pills">
+              <%= link_to "Go To Post", post_path(post), class: "btn btn-ghost" %>
+              <% if post.url.present? %>
+                <%= link_to "Open link", post.url, target: "_blank", rel: "noopener", class: "btn btn-ghost" %>
               <% end %>
             </div>
-
-            <div style="display:flex; align-items:center; gap:6px; margin:6px 0;">
-              <%= button_to "+", vote_path("Post", post.id, 1), method: :post, form: { style: "display:inline-block;margin-right:4px;" } %>
-              <%= button_to "-", vote_path("Post", post.id, -1), method: :post, form: { style: "display:inline-block;margin-right:4px;" } %>
-              <strong><%= post.score %></strong>
-            </div>
-
-            <div style="font-size: 0.9rem; color: #555;">
-              by
-              <%= link_to post.user.display_name, user_path(post.user) %>
-              (@<%= post.user.username %>) ·
-              <%= time_ago_in_words(post.created_at) %> ago
-              · <%= link_to "view", post_path(post) %>
-            </div>
-
-            <% if post.body.present? %>
-              <p style="margin:8px 0 0 0;"><%= simple_format(post.body) %></p>
-            <% end %>
           </div>
         </div>
-      </li>
+      </article>
     <% end %>
-  </ul>
+  </div>
 <% else %>
-  <p>No hay posts todavía.</p>
+  <div class="Card CardPad Empty" style="margin-top:12px;">
+    No posts yet.
+  </div>
 <% end %>

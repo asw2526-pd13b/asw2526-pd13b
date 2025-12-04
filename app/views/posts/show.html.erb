@@ -1,149 +1,179 @@
-<h1><%= @post.title %></h1>
+<% content_for :title, @post.title %>
 
-<!-- VOTOS DEL POST -->
-<div style="display:flex; align-items:center; gap:6px; margin:6px 0;">
-  <%= button_to "+", vote_path("Post", @post.id, 1), method: :post,
-        form: { style: "display:inline-block;margin-right:4px;" } %>
-  <%= button_to "-", vote_path("Post", @post.id, -1), method: :post,
-        form: { style: "display:inline-block;margin-right:4px;" } %>
-  <strong><%= @post.score %></strong>
+<% post_vv = vote_value_for(@post) %>
+
+<div class="PageHeader" style="align-items:flex-start;">
+  <div style="display:flex;gap:14px;align-items:flex-start;min-width:0;flex:1 1 auto;">
+    <div class="VoteStack" style="margin-top:2px;">
+      <%= button_to vote_path("Post", @post.id, 1), method: :post, class: "VoteBtn #{'is-upvoted' if post_vv == 1}", form: { class: "inline" } do %>↑<% end %>
+      <div class="VoteScore"><%= @post.score %></div>
+      <%= button_to vote_path("Post", @post.id, -1), method: :post, class: "VoteBtn #{'is-downvoted' if post_vv == -1}", form: { class: "inline" } do %>↓<% end %>
+    </div>
+
+    <div style="min-width:0;">
+      <h1 class="PageTitle" style="margin-bottom:6px;"><%= @post.title %></h1>
+      <div class="PostMeta">
+        <% if @post.community.present? %>
+          <span class="Badge"><%= link_to "c/#{@post.community.slug}", community_path(@post.community) %></span>
+        <% else %>
+          <span class="Badge">no community</span>
+        <% end %>
+        <span>by <%= link_to @post.user.display_name, user_path(@post.user) %> (@<%= @post.user.username %>)</span>
+        <span>· <%= time_ago_in_words(@post.created_at) %> ago</span>
+        <% if @post.url.present? %>
+          <span>· <%= link_to "open link", @post.url, target: "_blank", rel: "noopener" %></span>
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="Pills" style="align-items:flex-start;justify-content:flex-end;">
+    <% if user_signed_in? && @post.user_id == current_user.id %>
+      <%= link_to "Edit", edit_post_path(@post), class: "btn" %>
+      <%= button_to "Delete", post_path(@post), method: :delete, class: "btn btn-danger", form: { class: "inline" }, data: { confirm: "Segur que vols esborrar aquest post?" } %>
+    <% end %>
+
+    <%= link_to "Back", posts_path, class: "btn btn-ghost" %>
+  </div>
 </div>
 
-<p style="margin: 8px 0;">
-  <strong>Link:</strong> <%= link_to @post.url, @post.url, target: "_blank", rel: "noopener" %><br>
-  <strong>Community:</strong>
-  <% if @post.community.present? %>
-    <%= link_to @post.community.slug, community_path(@post.community) %>
-  <% else %>
-    (sin comunidad)
-  <% end %><br>
-  <%= link_to @post.user.display_name, user_path(@post.user) %>
-    (@<%= @post.user.username %>)
-  · <%= time_ago_in_words(@post.created_at) %> ago
-</p>
-
-<% if @post.image.attached? %>
-  <div style="margin: 10px 0;">
-    <% if @post.image.variable? %>
-      <%= image_tag @post.image.variant(resize_to_limit: [900, 600]),
-            style: "max-width:100%;height:auto;border-radius:10px;" %>
-    <% else %>
-      <%= image_tag @post.image, style: "max-width:100%;height:auto;border-radius:10px;" %>
-    <% end %>
-  </div>
-<% end %>
-
-<% if @post.body.present? %>
-  <div style="margin-top: 10px;">
-    <%= simple_format(@post.body) %>
-  </div>
-<% end %>
-
-<p style="margin-top: 12px;">
-  <% if @post.user_id == current_user.id %>
-    <%= link_to "Edit", edit_post_path(@post) %> |
-    <%= button_to "Delete", post_path(@post), method: :delete,
-          form: { style: "display:inline" },
-          data: { confirm: "Segur que vols esborrar aquest post?" } %> |
+<div class="Card CardPad Prose">
+  <% if @post.image.attached? %>
+    <div style="margin-bottom:12px;">
+      <% if @post.image.variable? %>
+        <%= image_tag @post.image.variant(resize_to_limit: [1100, 700]), style: "max-width:100%;height:auto;border-radius:16px;border:1px solid var(--border2);" %>
+      <% else %>
+        <%= image_tag @post.image, style: "max-width:100%;height:auto;border-radius:16px;border:1px solid var(--border2);" %>
+      <% end %>
+    </div>
   <% end %>
-  <%= link_to "Back to Posts", posts_path %>
-</p>
 
-<hr>
+  <% if @post.body.present? %>
+    <%= simple_format(@post.body) %>
+  <% else %>
+  <% end %>
+</div>
 
-<!-- ORDEN DE COMENTARIOS -->
+<div class="Divider"></div>
+
 <% current_sort = params[:sort].presence || "new" %>
-<p>
-  Comments order:
-  <%= link_to "Nou", post_path(@post, sort: "new") %> |
-  <%= link_to "Antic", post_path(@post, sort: "old") %>
-</p>
+<div class="PageHeader" style="margin-top:0;">
+  <div>
+    <h2 class="PageTitle" style="font-size:20px;margin:0;">Comments</h2>
+  </div>
+  <div class="Pills">
+    <%= link_to "New", post_path(@post, sort: "new"), class: "pill #{'is-active' if current_sort == 'new'}" %>
+    <%= link_to "Old", post_path(@post, sort: "old"), class: "pill #{'is-active' if current_sort == 'old'}" %>
+  </div>
+</div>
 
-<!-- CARGAR COMENTARIOS ORDENADOS -->
 <% comments_scope =
      case params[:sort]
      when "old" then @post.comments.includes(:user).oldest_first
      else            @post.comments.includes(:user).newest_first
      end %>
 
-<h2>Comments (<%= comments_scope.count %>)</h2>
-
-<ul style="list-style:none; padding-left:0;">
-  <% comments_scope.where(parent_id: nil).each do |c| %>
-    <li style="margin:12px 0; padding:8px 0; border-bottom:1px solid #eee;">
-
-      <!-- Comentario principal -->
-      <div style="font-size:0.9rem;color:#555;">
-        <strong><%= link_to c.user.display_name, user_path(c.user) %></strong>
-        · <%= time_ago_in_words(c.created_at) %> ago
+<div class="Card CardPad" style="box-shadow:none;">
+  <% if user_signed_in? %>
+    <%= form_with url: post_comments_path(@post, sort: params[:sort]), local: true, html: { class: "Form" } do %>
+      <%= hidden_field_tag "comment[parent_id]", nil %>
+      <div class="Field">
+        <label for="new_comment_body">Add a comment</label>
+        <%= text_area_tag "comment[body]", nil, id: "new_comment_body", rows: 4, class: "TextArea", placeholder: "Write your comment…" %>
       </div>
-
-      <!-- VOTACIÓN DEL COMENTARIO -->
-      <div style="display:flex; align-items:center; gap:6px; margin:4px 0;">
-        <%= button_to "+", vote_path("Comment", c.id, 1), method: :post,
-              form: { style: "display:inline-block;margin-right:4px;" } %>
-        <%= button_to "-", vote_path("Comment", c.id, -1), method: :post,
-              form: { style: "display:inline-block;margin-right:4px;" } %>
-        <strong><%= c.score %></strong>
+      <div class="Pills" style="justify-content:flex-end;">
+        <%= submit_tag "Comment", class: "btn btn-primary" %>
       </div>
-
-      <div><%= simple_format(c.body) %></div>
-
-      <!-- Formulario para responder -->
-      <div style="margin-top:6px;">
-        <%= form_with url: post_comments_path(@post, sort: params[:sort]), local: true do |f| %>
-          <%= hidden_field_tag "comment[parent_id]", c.id %>
-          <%= text_area_tag "comment[body]", nil, rows: 2, placeholder: "Responder...", style: "width:100%;" %><br>
-          <%= submit_tag "Responder" %>
-        <% end %>
-      </div>
-
-      <!-- REPLIES -->
-      <% c.replies.order(created_at: :asc).each do |r| %>
-        <div style="margin-left:16px; margin-top:8px; padding-left:8px; border-left:2px solid #ddd;">
-
-          <div style="font-size:0.85rem;color:#666;">
-            <strong><%= link_to r.user.display_name, user_path(r.user) %></strong>
-            · <%= time_ago_in_words(r.created_at) %> ago
-          </div>
-
-          <!-- VOTOS DE LA REPLY (CORREGIDO) -->
-          <div style="display:flex; align-items:center; gap:6px; margin:6px 0;">
-            <%= button_to "+", vote_path("Comment", r.id, 1), method: :post,
-                  form: { style: "display:inline-block;margin-right:4px;" } %>
-            <%= button_to "-", vote_path("Comment", r.id, -1), method: :post,
-                  form: { style: "display:inline-block;margin-right:4px;" } %>
-            <strong><%= r.score %></strong>
-          </div>
-
-          <div><%= simple_format(r.body) %></div>
-
-          <% if r.user_id == current_user.id %>
-            <div style="margin-top:4px;">
-              <%= button_to "Delete", comment_path(r), method: :delete,
-                    form: { style: "display:inline" },
-                    data: { confirm: "Segur que vols esborrar aquesta resposta?" } %>
-            </div>
-          <% end %>
-        </div>
-      <% end %>
-
-      <% if c.user_id == current_user.id %>
-        <div style="margin-top:4px;">
-          <%= button_to "Delete", comment_path(c), method: :delete,
-                form: { style: "display:inline" },
-                data: { confirm: "Segur que vols esborrar aquest comentari?" } %>
-        </div>
-      <% end %>
-    </li>
+    <% end %>
+  <% else %>
+    <div class="Empty" style="padding:16px;">
+      <span class="Badge">Sign in to comment</span>
+    </div>
   <% end %>
-</ul>
+</div>
 
-<!-- NUEVO COMENTARIO -->
-<h3>Nuevo comentario</h3>
-<%= form_with url: post_comments_path(@post, sort: params[:sort]), local: true do |f| %>
-  <%= hidden_field_tag "comment[parent_id]", nil %>
-  <%= text_area_tag "comment[body]", nil, rows: 4,
-        placeholder: "Escribe tu comentario…", style: "width:100%;" %><br>
-  <%= submit_tag "Comentar" %>
+<% roots = comments_scope.where(parent_id: nil) %>
+
+<% if roots.any? %>
+  <div class="Stack" style="margin-top:12px;">
+    <% roots.each do |c| %>
+      <% cvv = vote_value_for(c) %>
+      <div class="Card CardPad" style="box-shadow:none;">
+        <div style="display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start;">
+          <div class="VoteStack">
+            <%= button_to vote_path("Comment", c.id, 1), method: :post, class: "VoteBtn #{'is-upvoted' if cvv == 1}", form: { class: "inline" } do %>↑<% end %>
+            <div class="VoteScore"><%= c.score %></div>
+            <%= button_to vote_path("Comment", c.id, -1), method: :post, class: "VoteBtn #{'is-downvoted' if cvv == -1}", form: { class: "inline" } do %>↓<% end %>
+          </div>
+
+          <div style="min-width:0;">
+            <div class="PostMeta" style="margin-top:0;">
+              <strong><%= link_to c.user.display_name, user_path(c.user) %></strong>
+              <span>· <%= time_ago_in_words(c.created_at) %> ago</span>
+            </div>
+
+            <div class="Prose"><%= simple_format(c.body) %></div>
+
+            <div class="Pills" style="justify-content:flex-end;margin-top:10px;">
+              <% if user_signed_in? && c.user_id == current_user.id %>
+                <%= button_to "Delete", comment_path(c), method: :delete, class: "btn btn-danger", form: { class: "inline" }, data: { confirm: "Segur que vols esborrar aquest comentari?" } %>
+              <% end %>
+            </div>
+
+            <% if user_signed_in? %>
+              <div style="margin-top:12px;">
+                <%= form_with url: post_comments_path(@post, sort: params[:sort]), local: true do %>
+                  <%= hidden_field_tag "comment[parent_id]", c.id %>
+                  <div class="Field">
+                    <label class="sr-only" for="reply_<%= c.id %>">Reply</label>
+                    <%= text_area_tag "comment[body]", nil, id: "reply_#{c.id}", rows: 2, class: "TextArea", placeholder: "Reply…" %>
+                  </div>
+                  <div class="Pills" style="justify-content:flex-end;">
+                    <%= submit_tag "Reply", class: "btn" %>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+
+            <% replies = c.replies.order(created_at: :asc) %>
+            <% if replies.any? %>
+              <div class="Stack" style="margin-top:12px;gap:10px;">
+                <% replies.each do |r| %>
+                  <% rvv = vote_value_for(r) %>
+                  <div class="Card CardPad" style="box-shadow:none;border-color:var(--border2);background:rgba(255,255,255,.02);">
+                    <div style="display:grid;grid-template-columns:44px 1fr;gap:12px;align-items:start;">
+                      <div class="VoteStack">
+                        <%= button_to vote_path("Comment", r.id, 1), method: :post, class: "VoteBtn #{'is-upvoted' if rvv == 1}", form: { class: "inline" } do %>↑<% end %>
+                        <div class="VoteScore"><%= r.score %></div>
+                        <%= button_to vote_path("Comment", r.id, -1), method: :post, class: "VoteBtn #{'is-downvoted' if rvv == -1}", form: { class: "inline" } do %>↓<% end %>
+                      </div>
+
+                      <div style="min-width:0;">
+                        <div class="PostMeta" style="margin-top:0;">
+                          <strong><%= link_to r.user.display_name, user_path(r.user) %></strong>
+                          <span>· <%= time_ago_in_words(r.created_at) %> ago</span>
+                        </div>
+
+                        <div class="Prose"><%= simple_format(r.body) %></div>
+
+                        <div class="Pills" style="justify-content:flex-end;margin-top:10px;">
+                          <% if user_signed_in? && r.user_id == current_user.id %>
+                            <%= button_to "Delete", comment_path(r), method: :delete, class: "btn btn-danger", form: { class: "inline" }, data: { confirm: "Segur que vols esborrar aquesta resposta?" } %>
+                          <% end %>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="Card CardPad Empty" style="margin-top:12px;box-shadow:none;">
+    No comments yet.
+  </div>
 <% end %>

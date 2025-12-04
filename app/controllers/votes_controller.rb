@@ -1,37 +1,28 @@
 class VotesController < ApplicationController
   before_action :require_login
 
-  def vote
-    votable = find_votable
-    value = params[:value].to_i  # 1 o -1
+  ALLOWED_TYPES = %w[Post Comment].freeze
+  ALLOWED_VALUES = [1, -1].freeze
 
+  def vote
+    type = params[:type].to_s
+    id = params[:id]
+    value = params[:value].to_i
+
+    return redirect_back fallback_location: posts_path unless ALLOWED_TYPES.include?(type)
+    return redirect_back fallback_location: posts_path unless ALLOWED_VALUES.include?(value)
+
+    votable = type.constantize.find(id)
     vote = Vote.find_by(user: current_user, votable: votable)
 
-    # === LÓGICA ESPECIAL PARA MÍNIMO 0 ===
-
-    if value == 1
-      # UPVOTE
-      if vote&.value == 1
-        # Si ya tiene upvote → quitarlo (1 → 0)
-        vote.destroy
-      else
-        # Añadir upvote (o cambiar desde 0)
-        Vote.where(user: current_user, votable: votable).destroy_all
-        Vote.create(user: current_user, votable: votable, value: 1)
-      end
-
-    elsif value == -1
-      # DOWNVOTE → LO INTERPRETAMOS COMO "QUITAR UPVOTE"
-      vote&.destroy
-      # Y NO CREAMOS voto -1, porque no permites negativos
+    if vote&.value == value
+      vote.destroy
+    elsif vote
+      vote.update!(value: value)
+    else
+      Vote.create!(user: current_user, votable: votable, value: value)
     end
 
     redirect_back fallback_location: posts_path
-  end
-
-  private
-
-  def find_votable
-    params[:type].constantize.find(params[:id])
   end
 end

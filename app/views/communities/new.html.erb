@@ -1,3 +1,15 @@
-<h1>New Community</h1>
-<%= render "form", community: @community %>
-<p><%= link_to "Back", communities_path %></p>
+<% content_for :title, "New community" %>
+
+<div class="PageHeader">
+  <div>
+    <h1 class="PageTitle">New community</h1>
+    <p class="PageSubtitle">Create a space for focused technical discussion</p>
+  </div>
+  <div class="Pills">
+    <%= link_to "Back", communities_path, class: "btn btn-ghost" %>
+  </div>
+</div>
+
+<div class="Card CardPad">
+  <%= render "form", community: @community %>
+</div>

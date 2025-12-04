@@ -5,7 +5,7 @@ module Api
       ALLOWED_VALUES = [1, -1].freeze
 
       def create
-        type = params[:type] || params[:votable_type]
+        type = (params[:type] || params[:votable_type]).to_s
         id = params[:id] || params[:votable_id]
         value = (params[:value] || 1).to_i
 
@@ -16,26 +16,26 @@ module Api
         votable = type.constantize.find(id)
         vote = Vote.find_by(user: current_user, votable: votable)
 
-        upvoted = false
-
-        if value == 1
-          if vote&.value == 1
+        current_value =
+          if vote&.value == value
             vote.destroy
-            upvoted = false
+            0
+          elsif vote
+            vote.update!(value: value)
+            value
           else
-            if vote
-              vote.update!(value: 1)
-            else
-              Vote.create!(user: current_user, votable: votable, value: 1)
-            end
-            upvoted = true
+            Vote.create!(user: current_user, votable: votable, value: value)
+            value
           end
-        else
-          vote&.destroy
-          upvoted = false
-        end
 
-        render json: { votable_type: type, votable_id: votable.id, upvoted: upvoted, score: votable.score }
+        render json: {
+          votable_type: type,
+          votable_id: votable.id,
+          upvoted: current_value == 1,
+          downvoted: current_value == -1,
+          vote_value: current_value,
+          score: votable.score
+        }
       end
     end
   end
