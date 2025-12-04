@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <title><%= content_for(:title) || "Waslab04" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#0b0f14">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
     <%= yield :head %>
@@ -12,32 +13,168 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
     <%= stylesheet_link_tag :app %>
+    <style>
+      :root{
+        color-scheme: dark;
+        --bg:#0b0f14;
+        --panel:#0f1621;
+        --panel2:#121b28;
+        --text:#e6edf3;
+        --muted:#9aa4b2;
+        --border:rgba(255,255,255,.10);
+        --border2:rgba(255,255,255,.06);
+        --accent:#7dd3fc;
+        --accent2:#a78bfa;
+        --danger:#fb7185;
+        --ok:#34d399;
+        --shadow:0 12px 35px rgba(0,0,0,.45);
+        --round:18px;
+      }
+      *{box-sizing:border-box}
+      html,body{height:100%}
+      body{margin:0;background:radial-gradient(1200px 600px at 10% -10%, rgba(125,211,252,.14), transparent 60%),radial-gradient(900px 500px at 100% 0%, rgba(167,139,250,.12), transparent 55%),var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Apple Color Emoji","Segoe UI Emoji"}
+      a{color:var(--accent);text-decoration:none}
+      a:hover{text-decoration:underline}
+      .Container{max-width:1120px;margin:0 auto;padding:22px 16px}
+      .Topbar{position:sticky;top:0;z-index:50;background:rgba(11,15,20,.82);backdrop-filter:saturate(120%) blur(10px);border-bottom:1px solid var(--border)}
+      .TopbarInner{display:flex;align-items:center;gap:14px;max-width:1120px;margin:0 auto;padding:12px 16px}
+      .TopbarLeft{display:flex;align-items:center;gap:12px;min-width:0;flex:0 0 auto}
+      .TopbarSearch{flex:1 1 auto;min-width:0;display:flex;align-items:center}
+      .TopbarUser{display:flex;align-items:center;gap:10px;flex:0 0 auto;margin-left:auto}
+      .Brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.2px;color:var(--text);flex:0 0 auto}
+      .BrandMark{width:12px;height:12px;border-radius:999px;background:linear-gradient(135deg,var(--accent),var(--accent2))}
+      .Nav{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+      .NavLink{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:12px;color:var(--muted);border:1px solid transparent}
+      .NavLink:hover{text-decoration:none;color:var(--text);border-color:var(--border2);background:rgba(255,255,255,.03)}
+      .NavLink.is-active{color:var(--text);border-color:var(--border);background:rgba(255,255,255,.04)}
+      .Search{display:flex;align-items:center;gap:8px;width:100%}
+      .Input{width:100%;min-width:240px;max-width:420px;padding:10px 12px;border-radius:14px;border:1px solid var(--border2);background:rgba(255,255,255,.03);color:var(--text);outline:none}
+      .Input:focus{border-color:rgba(125,211,252,.55);box-shadow:0 0 0 4px rgba(125,211,252,.12)}
+      .Input::placeholder{color:rgba(154,164,178,.75)}
+      .TopbarSearch .Input{min-width:0;max-width:none}
+      .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:9px 12px;border-radius:14px;border:1px solid var(--border2);background:rgba(255,255,255,.03);color:var(--text);cursor:pointer;font-weight:650}
+      .btn:hover{text-decoration:none;border-color:var(--border);background:rgba(255,255,255,.05)}
+      .btn:active{transform:translateY(1px)}
+      .btn-primary{border-color:rgba(125,211,252,.35);background:rgba(125,211,252,.12)}
+      .btn-primary:hover{border-color:rgba(125,211,252,.60);background:rgba(125,211,252,.16)}
+      .btn-danger{border-color:rgba(251,113,133,.35);background:rgba(251,113,133,.12)}
+      .btn-danger:hover{border-color:rgba(251,113,133,.60);background:rgba(251,113,133,.16)}
+      .btn-quiet{padding:8px 10px;border-radius:12px}
+      .btn-ghost{border-color:transparent;background:transparent;color:var(--muted)}
+      .btn-ghost:hover{border-color:var(--border2);background:rgba(255,255,255,.03);color:var(--text)}
+      form.inline{display:inline}
+      .Card{background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(255,255,255,.02));border:1px solid var(--border2);border-radius:var(--round);box-shadow:0 12px 35px rgba(0,0,0,.45)}
+      .CardPad{padding:16px}
+      .VoteStack{display:flex;flex-direction:column;align-items:stretch;justify-content:center;overflow:hidden;width:44px;border-radius:12px;border:1px solid var(--border2);background:rgba(255,255,255,.02)}
+      .VoteBtn{all:unset;cursor:pointer;display:flex;align-items:center;justify-content:center;height:34px;width:100%;text-align:center;line-height:34px;color:rgba(230,237,243,.72);font-size:18px}
+      .VoteBtn:hover{background:rgba(255,255,255,.06);color:var(--text)}
+      .VoteScore{display:flex;align-items:center;justify-content:center;height:34px;width:100%;font-weight:900;font-size:14px;line-height:34px;border-top:1px solid var(--border2);border-bottom:1px solid var(--border2)}
+      .VoteBtn.is-upvoted{color:var(--ok)}
+      .VoteBtn.is-downvoted{color:var(--danger)}
+      .VoteBtn.is-upvoted:hover{background:rgba(52,211,153,.10)}
+      .VoteBtn.is-downvoted:hover{background:rgba(251,113,133,.10)}
+      .CommunityList{display:flex;flex-direction:column;gap:10px}
+      .CommunityRow{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px;border:1px solid var(--border2);border-radius:16px;background:rgba(255,255,255,.02)}
+      .CommunityRow:hover{background:rgba(255,255,255,.03);border-color:var(--border)}
+      .CommunityLeft{display:flex;align-items:center;gap:12px;min-width:0;flex:1 1 auto}
+      .CommunityText{min-width:0}
+      .CommunityName{font-weight:900;font-size:16px;line-height:1.2;margin:0}
+      .CommunityName a{text-decoration:none}
+      .CommunityName a:hover{text-decoration:underline}
+      .CommunitySlug{color:var(--muted);font-size:13px;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:520px}
+      .CommunityRight{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+      .CommunityStats{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+      .CommunityStat{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid var(--border2);background:rgba(255,255,255,.02);color:var(--muted);font-size:13px;font-weight:750}
+      @media (max-width: 860px){
+        .CommunityRow{flex-direction:column;align-items:stretch}
+        .CommunityRight{width:100%;justify-content:space-between}
+        .CommunitySlug{max-width:100%}
+      }
+      .PageHeader{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin:0 0 14px 0}
+      .PageTitle{margin:0;font-size:26px;letter-spacing:-.2px}
+      .PageSubtitle{margin:6px 0 0 0;color:var(--muted);font-size:14px}
+      .Pills{display:flex;flex-wrap:wrap;gap:8px}
+      .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid var(--border2);background:rgba(255,255,255,.02);color:var(--muted);font-weight:650}
+      .pill:hover{text-decoration:none;border-color:var(--border);color:var(--text);background:rgba(255,255,255,.04)}
+      .pill.is-active{color:var(--text);border-color:rgba(125,211,252,.35);background:rgba(125,211,252,.10)}
+      .Badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;border:1px solid var(--border2);background:rgba(255,255,255,.02);color:var(--muted);font-size:12px;font-weight:700}
+      .Divider{height:1px;background:var(--border2);margin:14px 0}
+      .Flash{border-radius:16px;border:1px solid var(--border2);padding:10px 12px;margin:0 0 14px 0}
+      .Flash.notice{border-color:rgba(52,211,153,.28);background:rgba(52,211,153,.10)}
+      .Flash.alert{border-color:rgba(251,113,133,.28);background:rgba(251,113,133,.10)}
+      .Stack{display:flex;flex-direction:column;gap:12px}
+      .PostCard{display:grid;grid-template-columns:44px 96px 1fr;gap:14px;overflow:hidden}
+      @media (max-width: 820px){.Input{min-width:160px}}
+      @media (max-width: 560px){.PostCard{grid-template-columns:1fr}.TopbarSearch{display:none}}
+      .Thumb{width:96px;height:96px;border-radius:16px;object-fit:cover;display:block;border:1px solid var(--border2);background:rgba(255,255,255,.03)}
+      .ThumbPlaceholder{width:96px;height:96px;border-radius:16px;border:1px dashed var(--border2);background:rgba(255,255,255,.02);display:flex;align-items:center;justify-content:center;color:rgba(154,164,178,.65);font-weight:800}
+      .PostTitle{margin:0;font-size:16px;line-height:1.25}
+      .PostMeta{display:flex;flex-wrap:wrap;gap:10px;align-items:center;color:var(--muted);font-size:13px;margin-top:6px}
+      .PostExcerpt{margin-top:10px;color:rgba(230,237,243,.88);font-size:14px;line-height:1.45}
+      .PostFooter{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px}
+      .Vote{display:flex;align-items:center;gap:8px}
+      .Score{font-weight:800}
+      .Form{display:flex;flex-direction:column;gap:12px}
+      .Field label{display:block;color:var(--muted);font-weight:700;margin:0 0 6px 0}
+      .Help{margin:6px 0 0 0;color:rgba(154,164,178,.85);font-size:12px}
+      .TextArea{width:100%;padding:10px 12px;border-radius:14px;border:1px solid var(--border2);background:rgba(255,255,255,.03);color:var(--text);outline:none;min-height:120px;resize:vertical}
+      .TextArea:focus{border-color:rgba(125,211,252,.55);box-shadow:0 0 0 4px rgba(125,211,252,.12)}
+      .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}
+      .Hero{border-radius:var(--round);overflow:hidden;border:1px solid var(--border2);background:rgba(255,255,255,.02)}
+      .HeroBanner{height:180px;background:radial-gradient(900px 500px at 0% 0%, rgba(125,211,252,.20), transparent 60%),radial-gradient(900px 500px at 100% 0%, rgba(167,139,250,.18), transparent 55%),rgba(255,255,255,.02)}
+      .HeroBanner img{width:100%;height:100%;object-fit:cover;display:block}
+      .HeroBody{padding:14px 16px}
+      .HeroTop{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+      .HeroIdentity{display:flex;align-items:center;gap:12px}
+      .HeroAvatar{width:64px;height:64px;border-radius:18px;object-fit:cover;border:1px solid var(--border2);background:rgba(255,255,255,.03)}
+      .HeroAvatarFallback{width:64px;height:64px;border-radius:18px;border:1px solid var(--border2);background:rgba(255,255,255,.03);display:flex;align-items:center;justify-content:center;font-weight:900;color:rgba(154,164,178,.7);font-size:22px}
+      .StatRow{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;color:var(--muted);font-size:13px}
+      .StatRow strong{color:var(--text)}
+    </style>
   </head>
   <body>
-    <header>
-      <nav style="padding: 1rem; background: #f5f5f5; margin-bottom: 2rem;">
-        <%= link_to "programming.dev", posts_path,
-            style: "font-weight: bold; text-decoration: none; color: black; font-size: 1.2em;" %>
-      </nav>
-      <div style="float: right;">
-        <% if user_signed_in? %>
-          <%= link_to current_user.username, user_path(current_user), style: "margin-right: 1rem; text-decoration: none; color: #0079d3; font-weight: bold;" %>
-          <%= button_to "Logout", destroy_user_session_path, method: :delete,
-          style: "margin-left: 1rem; display: inline; padding: 0; border: none; background: none; color: #0066cc; text-decoration: underline; cursor: pointer; font-size: 1em;" %>
-        <% else %>
-          <%= button_to "Sign in with GitHub", user_github_omniauth_authorize_path, method: :post, data: { turbo: false } %>
-        <% end %>
+    <header class="Topbar">
+      <div class="TopbarInner">
+        <div class="TopbarLeft">
+          <%= link_to posts_path, class: "Brand" do %>
+            <span class="BrandMark"></span>
+            <span>ProgrammersFIB</span>
+          <% end %>
+
+          <nav class="Nav">
+            <%= link_to "Posts", posts_path, class: "NavLink #{'is-active' if current_page?(posts_path)}" %>
+            <%= link_to "Communities", communities_path, class: "NavLink #{'is-active' if current_page?(communities_path)}" %>
+          </nav>
+        </div>
+
+        <div class="TopbarSearch">
+          <%= form_with url: posts_path, method: :get, local: true, class: "Search" do %>
+            <label class="sr-only" for="top_q">Search</label>
+            <%= text_field_tag :q, params[:q], id: "top_q", class: "Input", placeholder: "Search posts…", autocomplete: "off" %>
+          <% end %>
+        </div>
+
+        <div class="TopbarUser">
+          <% if user_signed_in? %>
+            <%= link_to user_path(current_user), class: "btn btn-ghost" do %>
+              <span>@<%= current_user.username %></span>
+            <% end %>
+            <%= button_to "Logout", destroy_user_session_path, method: :delete, class: "btn", form: { class: "inline" } %>
+          <% else %>
+            <%= button_to "Sign in with GitHub", user_github_omniauth_authorize_path, method: :post, class: "btn btn-primary", form: { class: "inline" } %>
+          <% end %>
+        </div>
       </div>
     </header>
-    <main style="padding: 0 2rem;">
-      <% if notice %>
-        <p style="background:#e6f4ea; border:1px solid #a8e6a2; padding:8px; border-radius:6px; color:#1b5e20;">
-          <%= notice %>
-        </p>
+
+    <main class="Container">
+      <% if notice.present? %>
+        <div class="Flash notice"><%= notice %></div>
       <% end %>
-      <% if alert %>
-        <p style="color: red;"><%= alert %></p>
+      <% if alert.present? %>
+        <div class="Flash alert"><%= alert %></div>
       <% end %>
+
       <%= yield %>
     </main>
   </body>

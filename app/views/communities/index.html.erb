@@ -1,36 +1,62 @@
-<h1>Communities</h1>
+<% content_for :title, "Communities" %>
 
-<p>
-  <%= link_to "Local", communities_path %> |
-  <%= link_to "Subscrit", communities_path(filter: :subscribed) %> |
-  <%= link_to "New Community", new_community_path %>
-</p>
+<div class="PageHeader">
+  <div>
+    <h1 class="PageTitle">Communities</h1>
+    <p class="PageSubtitle">Browse spaces and subscribe to stay in the loop</p>
+  </div>
+  <div class="Pills">
+    <% f = params[:filter].presence || "local" %>
+    <%= link_to "Local", communities_path, class: "pill #{'is-active' if f == 'local'}" %>
+    <%= link_to "Subscribed", communities_path(filter: :subscribed), class: "pill #{'is-active' if f == 'subscribed'}" %>
+    <%= link_to "New community", new_community_path, class: "btn btn-primary" %>
+  </div>
+</div>
 
-<table>
-  <thead>
-    <tr>
-      <th>Nom</th>
-      <th># Subscriptors</th>
-      <th># Publicacions</th>
-      <th># Comentaris</th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody>
-    <% @communities.each do |c| %>
-      <tr>
-        <td><%= link_to (c.name.presence || c.slug), community_path(c) %></td>
-        <td><%= c.subscribers.count %></td>
-        <td><%= c.posts.count %></td>
-        <td><%= Comment.joins(:post).where(posts: { community_id: c.id }).count rescue 0 %></td>
-        <td>
-          <% if current_user.subscribed_communities.exists?(c.id) %>
-            <%= button_to "Donar de baixa", unsubscribe_community_path(c), method: :delete %>
-          <% else %>
-            <%= button_to "Subscriure", subscribe_community_path(c), method: :post %>
-          <% end %>
-        </td>
-      </tr>
-    <% end %>
-  </tbody>
-</table>
+<div class="Card CardPad" style="box-shadow:none;">
+  <% if @communities.any? %>
+    <div class="CommunityList">
+      <% @communities.each do |c| %>
+        <div class="CommunityRow">
+          <div class="CommunityLeft">
+            <% if c.avatar.attached? %>
+              <%= image_tag c.avatar, class: "MiniAvatar", style: "width:44px;height:44px;border-radius:14px;" %>
+            <% else %>
+              <span class="MiniAvatar" style="width:44px;height:44px;border-radius:14px;display:inline-flex;align-items:center;justify-content:center;font-weight:900;color:rgba(154,164,178,.7);">c</span>
+            <% end %>
+
+            <div class="CommunityText">
+              <div class="CommunityName">
+                <%= link_to (c.name.presence || c.slug), community_path(c) %>
+              </div>
+              <div class="CommunitySlug">c/<%= c.slug %></div>
+            </div>
+          </div>
+
+          <div class="CommunityRight">
+            <div class="CommunityStats">
+              <span class="CommunityStat"><strong style="color:var(--text)"><%= c.subscribers.count %></strong> subs</span>
+              <span class="CommunityStat"><strong style="color:var(--text)"><%= c.posts.count %></strong> posts</span>
+              <span class="CommunityStat"><strong style="color:var(--text)"><%= (Comment.joins(:post).where(posts: { community_id: c.id }).count rescue 0) %></strong> comments</span>
+            </div>
+
+            <div style="display:flex;align-items:center;gap:10px;">
+              <% if user_signed_in? %>
+                <% if current_user.subscribed_communities.exists?(c.id) %>
+                  <%= button_to "Unsubscribe", unsubscribe_community_path(c), method: :delete, class: "btn", form: { class: "inline" } %>
+                <% else %>
+                  <%= button_to "Subscribe", subscribe_community_path(c), method: :post, class: "btn btn-primary", form: { class: "inline" } %>
+                <% end %>
+              <% else %>
+                <span class="Badge">Sign in to subscribe</span>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="Empty">No communities yet.</div>
+  <% end %>
+</div>
+

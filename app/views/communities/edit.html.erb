@@ -1,3 +1,15 @@
-<h1>Edit Community</h1>
-<%= render "form", community: @community %>
-<p><%= link_to "Back", community_path(@community) %></p>
+<% content_for :title, "Edit community" %>
+
+<div class="PageHeader">
+  <div>
+    <h1 class="PageTitle">Edit community</h1>
+    <p class="PageSubtitle">Update identity and visuals</p>
+  </div>
+  <div class="Pills">
+    <%= link_to "Back", community_path(@community), class: "btn btn-ghost" %>
+  </div>
+</div>
+
+<div class="Card CardPad">
+  <%= render "form", community: @community %>
+</div>

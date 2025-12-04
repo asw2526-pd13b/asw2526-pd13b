@@ -1,37 +1,41 @@
-<%= form_with(model: community, local: true, html: { multipart: true }) do |form| %>
+<%= form_with(model: community, local: true, html: { multipart: true, class: "Form" }) do |form| %>
   <% if community.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(community.errors.count, "error") %> impidieron guardar la comunidad:</h2>
-      <ul>
-        <% community.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+    <div class="Flash alert">
+      <div style="font-weight:800;margin-bottom:6px;">
+        <%= pluralize(community.errors.count, "error") %> prevented this community from being saved
+      </div>
+      <div class="Prose">
+        <ul style="margin:0;padding-left:18px;">
+          <% community.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :slug, "id (obligatorio)" %><br>
-    <%= form.text_field :slug, required: true, placeholder: "p.ej. programming" %>
-    <p style="font-size:0.9rem;color:#666;">Sólo minúsculas, números y guiones.</p>
+  <div class="Field">
+    <%= form.label :slug, "ID" %>
+    <%= form.text_field :slug, required: true, class: "Input", placeholder: "e.g. programming" %>
+    <p class="Help">Lowercase letters, numbers and hyphens recommended.</p>
   </div>
 
-  <div>
-    <%= form.label :name, "Nombre (opcional)" %><br>
-    <%= form.text_field :name %>
+  <div class="Field">
+    <%= form.label :name, "Name" %>
+    <%= form.text_field :name, class: "Input", placeholder: "Friendly display name" %>
   </div>
 
-  <div>
-    <%= form.label :avatar, "Avatar (opcional)" %><br>
-    <%= form.file_field :avatar, accept: "image/" %>
+  <div class="Field">
+    <%= form.label :avatar, "Avatar" %>
+    <%= form.file_field :avatar, accept: "image/*", class: "Input" %>
   </div>
 
-  <div>
-    <%= form.label :banner, "Banner (opcional)" %><br>
-    <%= form.file_field :banner, accept: "image/" %>
+  <div class="Field">
+    <%= form.label :banner, "Banner" %>
+    <%= form.file_field :banner, accept: "image/*", class: "Input" %>
   </div>
 
-  <div style="margin-top:1rem;">
-    <%= form.submit %>
+  <div class="Pills" style="justify-content:flex-end;">
+    <%= form.submit (community.persisted? ? "Save changes" : "Create community"), class: "btn btn-primary" %>
   </div>
 <% end %>

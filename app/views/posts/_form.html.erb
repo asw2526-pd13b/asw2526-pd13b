@@ -1,41 +1,46 @@
-<%= form_with(model: post, local: true) do |form| %>
+<%= form_with(model: post, local: true, html: { multipart: true, class: "Form" }) do |form| %>
   <% if post.errors.any? %>
-    <div id="error_explanation">
-      <h2><%= pluralize(post.errors.count, "error") %> impidieron guardar el post:</h2>
-      <ul>
-        <% post.errors.full_messages.each do |message| %>
-          <li><%= message %></li>
-        <% end %>
-      </ul>
+    <div class="Flash alert">
+      <div style="font-weight:800;margin-bottom:6px;">
+        <%= pluralize(post.errors.count, "error") %> prevented this post from being saved
+      </div>
+      <div class="Prose">
+        <ul style="margin:0;padding-left:18px;">
+          <% post.errors.full_messages.each do |message| %>
+            <li><%= message %></li>
+          <% end %>
+        </ul>
+      </div>
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :title, "Title" %><br>
-    <%= form.text_field :title, required: true, placeholder: "A short, descriptive title" %>
+  <div class="Field">
+    <%= form.label :title, "Title" %>
+    <%= form.text_field :title, required: true, class: "Input", placeholder: "Short, descriptive title" %>
   </div>
 
-  <div>
-    <%= form.label :url, "External URL" %><br>
-    <%= form.text_field :url, required: true, placeholder: "https://..." %>
+  <div class="Field">
+    <%= form.label :url, "Link (optional)" %>
+    <%= form.url_field :url, class: "Input", placeholder: "https://…" %>
+    <p class="Help">If you leave this empty, the post will behave like a text thread.</p>
   </div>
 
-  <div>
-    <%= form.label :body, "Body (optional)" %><br>
-    <%= form.text_area :body, rows: 6 %>
+  <div class="Field">
+    <%= form.label :body, "Body (optional)" %>
+    <%= form.text_area :body, rows: 10, class: "TextArea", placeholder: "Add context, code blocks, reproduction steps, etc." %>
   </div>
 
-  <div>
-    <%= form.label :community_id, "Community" %><br>
-    <%= form.collection_select :community_id, @communities, :id, :slug, prompt: "Select a community" %>
+  <div class="Field">
+    <%= form.label :community_id, "Community" %>
+    <%= form.collection_select :community_id, @communities, :id, :slug, { prompt: "Select a community" }, { class: "Input" } %>
   </div>
 
-  <div>
-    <%= form.label :image, "Imatge (opcional)" %><br>
-    <%= form.file_field :image, accept: "image/*" %>
+  <div class="Field">
+    <%= form.label :image, "Image (optional)" %>
+    <%= form.file_field :image, accept: "image/*", class: "Input" %>
   </div>
 
-  <div style="margin-top: 1rem;">
-    <%= form.submit "Create Post" %>
+  <div class="Pills" style="justify-content:flex-end;">
+    <%= form.submit (post.persisted? ? "Save changes" : "Create post"), class: "btn btn-primary" %>
   </div>
 <% end %>

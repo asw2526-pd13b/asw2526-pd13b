@@ -1,12 +1,20 @@
-<div id="<%= dom_id community %>">
-  <p>
-    <strong>Slug:</strong>
-    <%= community.slug %>
-  </p>
-
-  <p>
-    <strong>Name:</strong>
-    <%= community.name %>
-  </p>
-
+<div id="<%= dom_id community %>" class="Card CardPad">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <div style="display:flex;align-items:center;gap:12px;min-width:0;">
+      <% if community.avatar.attached? %>
+        <%= image_tag community.avatar, class: "HeroAvatar", style: "width:44px;height:44px;border-radius:14px;" %>
+      <% else %>
+        <div class="HeroAvatarFallback" style="width:44px;height:44px;border-radius:14px;font-size:16px;">
+          <%= (community.slug.to_s.first || "c").upcase %>
+        </div>
+      <% end %>
+      <div style="min-width:0;">
+        <div style="font-weight:850;">
+          <%= link_to (community.name.presence || community.slug), community_path(community) %>
+        </div>
+        <div style="color:var(--muted);font-size:13px;">c/<%= community.slug %></div>
+      </div>
+    </div>
+    <span class="Badge"><%= community.subscribers.count %> subs</span>
+  </div>
 </div>

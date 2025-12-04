@@ -1,27 +1,23 @@
-<div id="<%= dom_id post %>">
-  <p>
-    <strong>Title:</strong>
-    <%= post.title %>
-  </p>
-
-  <p>
-    <strong>Url:</strong>
-    <%= post.url %>
-  </p>
-
-  <p>
-    <strong>Body:</strong>
-    <%= post.body %>
-  </p>
-
-  <p>
-    <strong>User:</strong>
-    <%= post.user_id %>
-  </p>
-
-  <p>
-    <strong>Community:</strong>
-    <%= post.community %>
-  </p>
-
-</div>
+<article id="<%= dom_id post %>" class="Card CardPad">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+    <div style="min-width:0;">
+      <h2 class="PostTitle" style="margin:0;">
+        <%= link_to post.title, post_path(post) %>
+      </h2>
+      <div class="PostMeta">
+        <% if post.community.present? %>
+          <span class="Badge"><%= link_to "c/#{post.community.slug}", community_path(post.community) %></span>
+        <% end %>
+        <span>by <%= link_to post.user.display_name, user_path(post.user) %> (@<%= post.user.username %>)</span>
+        <span>· <%= time_ago_in_words(post.created_at) %> ago</span>
+        <span>· <%= post.score %> score</span>
+      </div>
+      <% if post.body.present? %>
+        <div class="PostExcerpt"><%= truncate(post.body, length: 220) %></div>
+      <% end %>
+    </div>
+    <div class="Pills">
+      <%= link_to "Open", post_path(post), class: "btn btn-ghost" %>
+    </div>
+  </div>
+</article>

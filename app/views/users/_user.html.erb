@@ -1,12 +1,18 @@
 <div id="<%= dom_id user %>">
-  <p>
-    <strong>Username:</strong>
-    <%= user.username %>
-  </p>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <% if user.respond_to?(:avatar_url) && user.avatar_url.present? %>
+      <img src="<%= user.avatar_url %>" alt="<%= user.username %>" class="HeroAvatar" style="width:44px;height:44px;border-radius:14px;">
+    <% else %>
+      <div class="HeroAvatarFallback" style="width:44px;height:44px;border-radius:14px;font-size:16px;">
+        <%= (user.username.to_s.first || "u").upcase %>
+      </div>
+    <% end %>
 
-  <p>
-    <strong>Display name:</strong>
-    <%= user.display_name %>
-  </p>
-
+    <div style="min-width:0;">
+      <div style="font-weight:850;">
+        <%= user.display_name.presence || user.username %>
+      </div>
+      <div style="color:var(--muted);font-size:13px;">@<%= user.username %></div>
+    </div>
+  </div>
 </div>
