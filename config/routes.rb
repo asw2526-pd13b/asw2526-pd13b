@@ -34,7 +34,11 @@ Rails.application.routes.draw do
     delete :unsubscribe, on: :member
   end
 
-  resources :users, only: [:index, :show, :edit, :update]
+  resources :users, only: [:index, :show, :edit, :update] do
+    member do
+      post :regenerate_api_key
+    end
+  end
 
   resources :posts do
     resources :comments, only: [:create]  # crear comentario asociado a post

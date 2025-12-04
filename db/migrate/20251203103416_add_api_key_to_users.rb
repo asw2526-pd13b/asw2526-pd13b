@@ -6,7 +6,7 @@ class AddApiKeyToUsers < ActiveRecord::Migration[8.0]
     User.reset_column_information
     User.find_each do |user|
       next if user.api_key.present?
-      user.update_columns(api_key: SecureRandom.hex(24))
+      user.update_columns(api_key: SecureRandom.hex(32))
     end
   end
 

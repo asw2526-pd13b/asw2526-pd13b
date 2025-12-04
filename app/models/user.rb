@@ -31,6 +31,21 @@ class User < ApplicationRecord
     posts.count
   end
 
+  def regenerate_api_key!
+    update(api_key: generate_unique_api_key)
+  end
+
+  def generate_api_key
+    self.api_key = generate_unique_api_key
+  end
+
+  def generate_unique_api_key
+    loop do
+      token = SecureRandom.hex(32)
+      break token unless User.exists?(api_key: token)
+    end
+  end
+
   def comments_count
     comments.count
   end
