@@ -50,7 +50,6 @@
 <div class="PageHeader">
   <div>
     <h2 class="PageTitle" style="font-size:20px;margin:0;">Latest posts</h2>
-    <p class="PageSubtitle">Fresh discussions from this community</p>
   </div>
   <div class="Pills">
     <%= link_to "Back to communities", communities_path, class: "btn btn-ghost" %>
@@ -75,7 +74,7 @@
             <div class="PostMeta">
               <span>by <%= link_to p.user.display_name, user_path(p.user) %> (@<%= p.user.username %>)</span>
               <span>· <%= time_ago_in_words(p.created_at) %> ago</span>
-              <span>· <%= link_to "Discussion", post_path(p) %></span>
+              <span>· <%= link_to "Go To Post", post_path(p) %></span>
             </div>
             <% if p.body.present? %>
               <div class="PostExcerpt"><%= truncate(p.body, length: 220) %></div>
