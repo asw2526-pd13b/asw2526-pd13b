@@ -1,15 +1,12 @@
 <div style="max-width: 900px; margin: 0 auto;">
-  <!-- Banner -->
   <div style="height: 200px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px; margin-bottom: -60px; position: relative;">
     <% if @user.banner_url.present? %>
       <img src="<%= @user.banner_url %>" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" alt="Banner">
     <% end %>
   </div>
 
-  <!-- Informació del perfil -->
   <div style="background: white; border: 1px solid #ddd; border-radius: 8px; padding: 20px; margin-bottom: 20px;">
     <div style="display: flex; align-items: flex-start; gap: 20px;">
-      <!-- Avatar -->
       <div style="position: relative; top: -40px;">
         <% if @user.avatar_url.present? %>
           <img src="<%= @user.avatar_url %>"
@@ -22,7 +19,6 @@
         <% end %>
       </div>
 
-      <!-- Info principal -->
       <div style="flex: 1; padding-top: 10px;">
         <div style="display: flex; justify-content: space-between; align-items: start;">
           <div>
@@ -40,7 +36,6 @@
           <p style="margin-top: 15px; color: #1c1c1c;"><%= @user.bio %></p>
         <% end %>
 
-        <!-- Estadístiques -->
         <div style="display: flex; gap: 20px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #eee;">
           <div>
             <strong><%= @user.posts_count %></strong>
@@ -58,27 +53,23 @@
     </div>
   </div>
 
-  <!-- API KEY -->
   <% if user_signed_in? && current_user == @user %>
-  <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
-    <strong>🔑 API Key (privada):</strong>
-    <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
-      <code style="flex: 1; padding: 10px; background: white; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; word-break: break-all;">
-        <%= @user.api_key %>
-      </code>
-      <%= button_to "Regenerar", regenerate_api_key_user_path(@user),
-          method: :post,
-          data: { confirm: "Estàs segur? L'API key antiga deixarà de funcionar." },
-          style: "padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;" %>
+    <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
+      <strong>🔑 API Key (privada):</strong>
+      <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
+        <input type="password" value="<%= current_user.api_key %>" readonly style="flex: 1; padding: 10px; background: white; border: 1px solid #ddd; border-radius: 4px; font-family: monospace;" onclick="this.type='text'; this.select();">
+        <%= button_to "Regenerar", regenerate_api_key_user_path(@user),
+            method: :post,
+            data: { confirm: "Estàs segur? L'API key antiga deixarà de funcionar." },
+            style: "padding: 8px 16px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;" %>
+      </div>
+      <small style="color: #856404; display: block; margin-top: 10px;">
+        ⚠️ No comparteixis aquesta clau amb ningú. Úsala per accedir a l'API.
+      </small>
     </div>
-    <small style="color: #856404; display: block; margin-top: 10px;">
-      ⚠️ No comparteixis aquesta clau amb ningú. Úsala per accedir a l'API.
-    </small>
-  </div>
-<% end %>
+  <% end %>
 
-  <!-- Tabs -->
-  <div style="background: white; border: 1px solid #ddd; border-radius: 8px 8px 0 0; padding: 0;">
+  <div style="background: white; border: 1px solid #ddd; border-radius: 8px 8px 0 0; padding: 0; margin-top: 20px;">
     <div style="display: flex; border-bottom: 2px solid #eee;">
       <%= link_to "Publicacions", user_path(@user, tab: 'posts'),
           style: "padding: 15px 30px; text-decoration: none; color: #{@active_tab == 'posts' ? '#0079d3' : '#666'}; border-bottom: 3px solid #{@active_tab == 'posts' ? '#0079d3' : 'transparent'}; font-weight: #{@active_tab == 'posts' ? 'bold' : 'normal'};" %>
@@ -87,10 +78,8 @@
     </div>
   </div>
 
-  <!-- Contingut segons el tab actiu -->
   <div style="background: white; border: 1px solid #ddd; border-top: none; border-radius: 0 0 8px 8px; padding: 20px;">
     <% if @active_tab == 'posts' %>
-      <!-- Publicacions -->
       <% if @posts.any? %>
         <% @posts.each do |post| %>
           <div style="border-bottom: 1px solid #eee; padding: 15px 0;">
@@ -114,9 +103,7 @@
           Aquest usuari encara no ha publicat res.
         </p>
       <% end %>
-
     <% elsif @active_tab == 'comments' %>
-      <!-- Comentaris -->
       <% if @comments.any? %>
         <% @comments.each do |comment| %>
           <div style="border-bottom: 1px solid #eee; padding: 15px 0;">

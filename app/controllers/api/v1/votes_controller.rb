@@ -1,98 +1,41 @@
 module Api
   module V1
     class VotesController < BaseController
-      before_action :authenticate_api_key!
+      ALLOWED_TYPES = %w[Post Comment].freeze
+      ALLOWED_VALUES = [1, -1].freeze
 
-      # POST /api/v1/votes
-      # Params: { votable_type: "Post", votable_id: 1, value: 1 }
       def create
-        votable = find_votable
-        value = params[:value].to_i  # 1 o -1
+        type = params[:type] || params[:votable_type]
+        id = params[:id] || params[:votable_id]
+        value = (params[:value] || 1).to_i
 
-        unless votable
-          render json: { error: 'Votable not found' }, status: :not_found
-          return
-        end
+        return render json: { error: "bad_request" }, status: :bad_request if type.blank? || id.blank?
+        return render json: { error: "bad_request" }, status: :bad_request unless ALLOWED_TYPES.include?(type)
+        return render json: { error: "bad_request" }, status: :bad_request unless ALLOWED_VALUES.include?(value)
 
-        unless [1, -1].include?(value)
-          render json: { error: 'Value must be 1 or -1' }, status: :unprocessable_entity
-          return
-        end
+        votable = type.constantize.find(id)
+        vote = Vote.find_by(user: current_user, votable: votable)
 
-        vote = Vote.find_by(user: current_api_user, votable: votable)
+        upvoted = false
 
-        # Lògica de vot (mínim 0)
         if value == 1
-          # UPVOTE
           if vote&.value == 1
-            # Si ja té upvote → treure'l (1 → 0)
             vote.destroy
-            message = 'Vote removed'
+            upvoted = false
           else
-            # Afegir upvote (o canviar des de 0)
-            Vote.where(user: current_api_user, votable: votable).destroy_all
-            Vote.create!(user: current_api_user, votable: votable, value: 1)
-            message = 'Upvoted'
+            if vote
+              vote.update!(value: 1)
+            else
+              Vote.create!(user: current_user, votable: votable, value: 1)
+            end
+            upvoted = true
           end
-        elsif value == -1
-          # DOWNVOTE → TREURE UPVOTE
-          if vote
-            vote.destroy
-            message = 'Vote removed'
-          else
-            message = 'No vote to remove'
-          end
-        end
-
-        render json: {
-          message: message,
-          vote_count: votable.votes.sum(:value)
-        }, status: :ok
-
-      rescue ActiveRecord::RecordInvalid => e
-        render json: {
-          error: 'Validation failed',
-          details: e.record.errors.full_messages
-        }, status: :unprocessable_entity
-      end
-
-      # DELETE /api/v1/votes
-      # Params: { votable_type: "Post", votable_id: 1 }
-      def destroy
-        votable = find_votable
-
-        unless votable
-          render json: { error: 'Votable not found' }, status: :not_found
-          return
-        end
-
-        vote = Vote.find_by(user: current_api_user, votable: votable)
-
-        if vote
-          vote.destroy
-          render json: {
-            message: 'Vote removed',
-            vote_count: votable.votes.sum(:value)
-          }, status: :ok
         else
-          render json: { error: 'No vote found' }, status: :not_found
-        end
-      end
-
-      private
-
-      def find_votable
-        votable_type = params[:votable_type]
-        votable_id = params[:votable_id]
-
-        return nil unless votable_type.present? && votable_id.present?
-
-        # Validar que sigui un tipus vàlid
-        unless ['Post', 'Comment'].include?(votable_type)
-          return nil
+          vote&.destroy
+          upvoted = false
         end
 
-        votable_type.constantize.find_by(id: votable_id)
+        render json: { votable_type: type, votable_id: votable.id, upvoted: upvoted, score: votable.score }
       end
     end
   end
