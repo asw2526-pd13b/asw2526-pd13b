@@ -3,6 +3,10 @@ class CommentsController < ApplicationController
   before_action :set_post, only: :create
   before_action :authorize_comment_owner, only: [:destroy]
 
+  def index
+    @comments = Comment.includes(:user, :post).order(created_at: :desc).limit(50)
+  end
+
   def create
     @comment = current_user.comments.build(comment_params.merge(post: @post))
 
@@ -19,8 +23,13 @@ class CommentsController < ApplicationController
   def destroy
     comment = Comment.find(params[:id])
     post = comment.post
-    comment.destroy
-    redirect_to post_path(post), notice: "Comentari esborrat."
+
+    if current_user == comment.user
+      comment.destroy
+      redirect_back fallback_location: post_path(post), notice: "Comentari esborrat."
+    else
+      redirect_back fallback_location: post_path(post), alert: "No tienes permiso para borrar esto."
+    end
   end
 
   private

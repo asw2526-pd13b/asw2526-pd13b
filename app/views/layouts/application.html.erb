@@ -143,6 +143,7 @@
 
           <nav class="Nav">
             <%= link_to "Posts", posts_path, class: "NavLink #{'is-active' if current_page?(posts_path)}" %>
+            <%= link_to "Comments", comments_path, class: "NavLink #{'is-active' if current_page?(comments_path)}" %>
             <%= link_to "Communities", communities_path, class: "NavLink #{'is-active' if current_page?(communities_path)}" %>
           </nav>
         </div>

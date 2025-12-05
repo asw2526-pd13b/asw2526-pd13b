@@ -1,0 +1,63 @@
+<% content_for :title, "Comments Timeline" %>
+
+<div class="PageHeader">
+  <div>
+    <h1 class="PageTitle">Comments</h1>
+    <p class="PageSubtitle">Todas las conversaciones recientes</p>
+  </div>
+  <div class="Pills">
+    <%= link_to "Back to Posts", posts_path, class: "btn btn-ghost" %>
+  </div>
+</div>
+
+<% if @comments.any? %>
+  <div class="Stack" style="margin-top:12px;">
+    <% @comments.each do |comment| %>
+      <% cvv = vote_value_for(comment) %>
+
+      <article class="Card PostCard" style="border-left: 4px solid var(--border2);"> <div style="padding:14px 0 14px 14px;display:flex;align-items:flex-start;">
+
+          <div class="VoteStack">
+            <%= button_to vote_path("Comment", comment.id, 1), method: :post, class: "VoteBtn #{'is-upvoted' if cvv == 1}", form: { class: "inline" } do %>↑<% end %>
+            <div class="VoteScore"><%= comment.score %></div>
+            <%= button_to vote_path("Comment", comment.id, -1), method: :post, class: "VoteBtn #{'is-downvoted' if cvv == -1}", form: { class: "inline" } do %>↓<% end %>
+          </div>
+        </div>
+
+        <div style="padding:14px 14px 14px 0;min-width:0; width: 100%;">
+
+          <div class="PostMeta" style="margin-top:0;">
+            <strong><%= link_to comment.user.display_name, user_path(comment.user) %></strong>
+            <span>commented on</span>
+            <%= link_to truncate(comment.post.title, length: 50), post_path(comment.post) %>
+            <span>· <%= time_ago_in_words(comment.created_at) %> ago</span>
+          </div>
+
+          <div class="Prose" style="font-size: 15px; margin-top:8px;">
+            <%= simple_format(truncate(comment.body, length: 300)) %>
+          </div>
+
+          <div class="PostFooter">
+            <div></div> <div class="Pills">
+
+              <% if user_signed_in? %>
+                <% if current_user.saved_comments.exists?(comment.id) %>
+                  <%= button_to "Unsave", api_v1_comment_save_path(comment), method: :delete, class: "btn btn-ghost btn-small" %>
+                <% else %>
+                  <%= button_to "Save", api_v1_comment_save_path(comment), method: :post, class: "btn btn-ghost btn-small" %>
+                <% end %>
+              <% end %>
+
+              <%= link_to "View Context", post_path(comment.post, anchor: "comment_#{comment.id}"), class: "btn btn-ghost btn-small" %>
+            </div>
+          </div>
+
+        </div>
+      </article>
+    <% end %>
+  </div>
+<% else %>
+  <div class="Card CardPad Empty" style="margin-top:12px;">
+    No comments yet.
+  </div>
+<% end %>
