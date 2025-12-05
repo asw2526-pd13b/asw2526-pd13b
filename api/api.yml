@@ -3,7 +3,7 @@ info:
   title: ASW PD13B API
   version: "1.0.0"
 servers:
-  - url: https://waslab04-3y91.onrender.com
+  - url: https://waslab04-5vgs.onrender.com
   - url: http://localhost:3000
 components:
   securitySchemes:
