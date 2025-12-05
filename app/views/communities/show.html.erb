@@ -1,32 +1,92 @@
-<h1><%= @community.name.presence || @community.slug %></h1>
-<p><strong>id:</strong> <%= @community.slug %></p>
+<% content_for :title, (@community.name.presence || @community.slug) %>
 
-<% if @community.banner.attached? %>
-  <div><%= image_tag @community.banner, style: "max-width:100%;height:auto;" %></div>
+<div class="Hero">
+  <div class="HeroBanner">
+    <% if @community.banner.attached? %>
+      <%= image_tag @community.banner %>
+    <% end %>
+  </div>
+
+  <div class="HeroBody">
+    <div class="HeroTop">
+      <div class="HeroIdentity">
+        <% if @community.avatar.attached? %>
+          <%= image_tag @community.avatar, class: "HeroAvatar" %>
+        <% else %>
+          <div class="HeroAvatarFallback"><%= (@community.slug.to_s.first || "c").upcase %></div>
+        <% end %>
+        <div>
+          <h1 class="PageTitle" style="margin:0;"><%= @community.name.presence || @community.slug %></h1>
+          <div class="PostMeta" style="margin-top:4px;">
+            <span class="Badge">c/<%= @community.slug %></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="Pills">
+        <% if user_signed_in? %>
+          <% if current_user.subscribed_communities.exists?(@community.id) %>
+            <%= button_to "Unsubscribe", unsubscribe_community_path(@community), method: :delete, class: "btn", form: { class: "inline" } %>
+          <% else %>
+            <%= button_to "Subscribe", subscribe_community_path(@community), method: :post, class: "btn btn-primary", form: { class: "inline" } %>
+          <% end %>
+        <% else %>
+          <span class="Badge">Sign in to subscribe</span>
+        <% end %>
+        <%= link_to "Create post", new_post_path(community_id: @community.id), class: "btn btn-ghost" %>
+      </div>
+    </div>
+
+    <div class="StatRow">
+      <span><strong><%= @community.subscribers.count %></strong> subscribers</span>
+      <span><strong><%= @community.posts.count %></strong> posts</span>
+      <span><strong><%= (Comment.joins(:post).where(posts: { community_id: @community.id }).count rescue 0) %></strong> comments</span>
+    </div>
+  </div>
+</div>
+
+<div class="Divider"></div>
+
+<div class="PageHeader">
+  <div>
+    <h2 class="PageTitle" style="font-size:20px;margin:0;">Latest posts</h2>
+  </div>
+  <div class="Pills">
+    <%= link_to "Back to communities", communities_path, class: "btn btn-ghost" %>
+  </div>
+</div>
+
+<% posts = @community.posts.order(created_at: :desc) %>
+
+<% if posts.any? %>
+  <div class="Stack">
+    <% posts.each do |p| %>
+      <div class="Card CardPad">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+          <div style="min-width:0;">
+            <h3 class="PostTitle" style="margin:0;">
+              <% if p.url.present? %>
+                <%= link_to p.title, p.url, target: "_blank", rel: "noopener" %>
+              <% else %>
+                <%= link_to p.title, post_path(p) %>
+              <% end %>
+            </h3>
+            <div class="PostMeta">
+              <span>by <%= link_to p.user.display_name, user_path(p.user) %> (@<%= p.user.username %>)</span>
+              <span>· <%= time_ago_in_words(p.created_at) %> ago</span>
+              <span>· <%= link_to "Go To Post", post_path(p) %></span>
+            </div>
+            <% if p.body.present? %>
+              <div class="PostExcerpt"><%= truncate(p.body, length: 220) %></div>
+            <% end %>
+          </div>
+          <div class="Vote">
+            <span class="Score"><%= p.score %></span>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+<% else %>
+  <div class="Card CardPad Empty">No posts in this community yet.</div>
 <% end %>
-
-<% if @community.avatar.attached? %>
-  <div style="margin-top:8px;"><%= image_tag @community.avatar, style: "width:96px;height:96px;object-fit:cover;border-radius:8px;" %></div>
-<% end %>
-
-<p style="margin-top: 10px;">
-  <% if current_user.subscribed_communities.exists?(@community.id) %>
-    <%= button_to "Donar de baixa", unsubscribe_community_path(@community), method: :delete %>
-  <% else %>
-    <%= button_to "Subscriure", subscribe_community_path(@community), method: :post %>
-  <% end %>
-</p>
-
-<h2>Posts</h2>
-<ul>
-  <% @community.posts.order(created_at: :desc).each do |p| %>
-    <li>
-      <strong><%= link_to p.title, p.url, target: "_blank", rel: "noopener" %></strong>
-      (<%= link_to "view", post_path(p) %>)
-    </li>
-  <% end %>
-</ul>
-
-<p style="margin-top:1rem;">
-  <%= link_to "Back to communities", communities_path %>
-</p>

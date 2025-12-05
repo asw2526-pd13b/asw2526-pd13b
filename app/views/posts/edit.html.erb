@@ -1,12 +1,15 @@
-<% content_for :title, "Editing post" %>
+<% content_for :title, "Edit post" %>
 
-<h1>Editing post</h1>
+<div class="PageHeader">
+  <div>
+    <h1 class="PageTitle">Edit post</h1>
+    <p class="PageSubtitle">Polish the title, link, and details</p>
+  </div>
+  <div class="Pills">
+    <%= link_to "Back", post_path(@post), class: "btn btn-ghost" %>
+  </div>
+</div>
 
-<%= render "form", post: @post %>
-
-<br>
-
-<div>
-  <%= link_to "Show this post", @post %> |
-  <%= link_to "Back to posts", posts_path %>
+<div class="Card CardPad">
+  <%= render "form", post: @post %>
 </div>

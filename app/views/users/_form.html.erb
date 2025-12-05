@@ -1,27 +1,30 @@
-<%= form_with(model: user) do |form| %>
+<%= form_with(model: user, local: true, class: "Form") do |form| %>
   <% if user.errors.any? %>
-    <div style="color: red">
-      <h2><%= pluralize(user.errors.count, "error") %> prohibited this user from being saved:</h2>
-
-      <ul>
-        <% user.errors.each do |error| %>
-          <li><%= error.full_message %></li>
-        <% end %>
-      </ul>
+    <div class="Flash alert">
+      <div style="font-weight:800;margin-bottom:6px;">
+        <%= pluralize(user.errors.count, "error") %> prohibited this user from being saved
+      </div>
+      <div class="Prose">
+        <ul style="margin:0;padding-left:18px;">
+          <% user.errors.each do |error| %>
+            <li><%= error.full_message %></li>
+          <% end %>
+        </ul>
+      </div>
     </div>
   <% end %>
 
-  <div>
-    <%= form.label :username, style: "display: block" %>
-    <%= form.text_field :username %>
+  <div class="Field">
+    <%= form.label :username, "Username" %>
+    <%= form.text_field :username, class: "Input", autocomplete: "username" %>
   </div>
 
-  <div>
-    <%= form.label :display_name, style: "display: block" %>
-    <%= form.text_field :display_name %>
+  <div class="Field">
+    <%= form.label :display_name, "Display name" %>
+    <%= form.text_field :display_name, class: "Input" %>
   </div>
 
-  <div>
-    <%= form.submit %>
+  <div class="Pills" style="justify-content:flex-end;">
+    <%= form.submit (user.persisted? ? "Save changes" : "Create user"), class: "btn btn-primary" %>
   </div>
 <% end %>

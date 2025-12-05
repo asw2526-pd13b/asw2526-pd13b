@@ -22,7 +22,8 @@ module Api
         when "comments"
           posts = posts.left_joins(:comments).group(:id).order("COUNT(comments.id) DESC")
         when "top", "popular"
-          posts = posts.left_joins(:votes).group("posts.id").order(Arel.sql("COALESCE(SUM(votes.value), 0) DESC, posts.created_at DESC"))
+          score_sql = "CASE WHEN COALESCE(SUM(votes.value), 0) < 0 THEN 0 ELSE COALESCE(SUM(votes.value), 0) END"
+          posts = posts.left_joins(:votes).group("posts.id").order(Arel.sql("#{score_sql} DESC, posts.created_at DESC"))
         else
           posts = posts.order(created_at: :desc)
         end
@@ -34,12 +35,11 @@ module Api
         post = Post.includes(comments: [:user]).includes(:user, :community).find(params[:id])
         comments = post.comments.includes(:user)
 
-        case params[:comments_sort]
-        when "old"
-          comments = comments.oldest_first
-        else
-          comments = comments.newest_first
-        end
+        comments =
+          case params[:comments_sort]
+          when "old" then comments.oldest_first
+          else comments.newest_first
+          end
 
         render json: { post: serialize_post(post), comments: comments.map { |c| serialize_comment(c) } }
       end

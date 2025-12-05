@@ -1,16 +1,26 @@
-<p style="color: green"><%= notice %></p>
-
 <% content_for :title, "Users" %>
 
-<h1>Users</h1>
+<div class="PageHeader">
+  <div>
+    <h1 class="PageTitle">Users</h1>
+    <p class="PageSubtitle">People, profiles and activity</p>
+  </div>
+  <div class="Pills">
+    <%= link_to "Back to posts", posts_path, class: "btn btn-ghost" %>
+  </div>
+</div>
 
-<div id="users">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">
   <% @users.each do |user| %>
-    <%= render user %>
-    <p>
-      <%= link_to "Show this user", user %>
-    </p>
+    <div class="Card CardPad">
+      <%= render user %>
+      <div class="Pills" style="margin-top:12px;justify-content:flex-end;">
+        <%= link_to "View profile", user_path(user), class: "btn btn-ghost" %>
+      </div>
+    </div>
   <% end %>
 </div>
 
-<%= link_to "New user", new_user_path %>
+<% if @users.empty? %>
+  <div class="Card CardPad Empty">No users found.</div>
+<% end %>

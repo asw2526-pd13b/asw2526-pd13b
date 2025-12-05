@@ -1,3 +1,15 @@
-<h1>Create Post</h1>
-<%= render "form", post: @post %>
-<p><%= link_to "Back to Posts", posts_path %></p>
+<% content_for :title, "Create post" %>
+
+<div class="PageHeader">
+  <div>
+    <h1 class="PageTitle">Create post</h1>
+    <p class="PageSubtitle">Share a link, a note, or start a discussion</p>
+  </div>
+  <div class="Pills">
+    <%= link_to "Back", posts_path, class: "btn btn-ghost" %>
+  </div>
+</div>
+
+<div class="Card CardPad">
+  <%= render "form", post: @post %>
+</div>
