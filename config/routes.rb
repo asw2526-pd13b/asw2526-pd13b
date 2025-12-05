@@ -52,7 +52,7 @@ Rails.application.routes.draw do
     resources :comments, only: [:create]  # crear comentario asociado a post
   end
 
-  resources :comments, only: [:destroy]
+  resources :comments, only: [:index, :destroy]
 
   get "up" => "rails/health#show", as: :rails_health_check
 
