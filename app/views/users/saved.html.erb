@@ -1,0 +1,101 @@
+<% content_for :title, "Saved Items" %>
+
+<div class="PageHeader">
+  <div>
+    <h1 class="PageTitle">Elementos Guardados</h1>
+    <div class="PostMeta">Solo tú puedes ver esta página</div>
+  </div>
+  <div class="Pills">
+    <%= link_to "Back to Profile", user_path(@user), class: "btn btn-ghost" %>
+  </div>
+</div>
+
+<div class="Pills" style="justify-content:space-between;align-items:center; margin-top: 20px;">
+  <div class="Tabs">
+    <%= link_to "Posts", user_path(@user, tab: "posts"), class: "Tab" %>
+    <%= link_to "Comments", user_path(@user, tab: "comments"), class: "Tab" %>
+    <span class="Tab is-active">Saved</span>
+  </div>
+</div>
+
+<div class="SavedContainer" style="margin-top:20px;">
+
+  <h3 class="PageTitle" style="font-size: 20px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom:8px;">
+    Posts Guardados (<%= @saved_posts.count %>)
+  </h3>
+
+  <% if @saved_posts.any? %>
+    <div class="Stack" style="gap:12px;">
+      <% @saved_posts.each do |post| %>
+        <article class="Card CardPad">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+            <div style="flex: 1;">
+              <div class="PostMeta" style="margin-top:0;">
+                <span class="Badge">c/<%= post.community.slug %></span>
+                <span>• posted by <%= post.user.username %></span>
+                <span>• <%= time_ago_in_words(post.created_at) %> ago</span>
+              </div>
+
+              <h2 class="PostTitle" style="font-size: 18px; margin: 6px 0;">
+                <%= link_to post.title, post_path(post) %>
+              </h2>
+
+              <% if post.url.present? %>
+                <div style="font-size:13px; margin-bottom:6px;">
+                  <%= link_to truncate(post.url, length: 50), post.url, target: "_blank", style: "color:var(--primary);" %>
+                </div>
+              <% end %>
+            </div>
+
+            <div style="flex-shrink: 0;">
+               <%= button_to "Unsave", api_v1_post_save_path(post), method: :delete, class: "btn btn-danger btn-small" %>
+            </div>
+          </div>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="Card CardPad Empty">No has guardado ningún post todavía.</div>
+  <% end %>
+
+
+  <div style="margin-top: 40px;"></div>
+
+  <h3 class="PageTitle" style="font-size: 20px; margin-bottom: 12px; border-bottom: 1px solid var(--border); padding-bottom:8px;">
+    Comentarios Guardados (<%= @saved_comments.count %>)
+  </h3>
+
+  <% if @saved_comments.any? %>
+    <div class="Stack" style="gap:12px;">
+      <% @saved_comments.each do |comment| %>
+        <article class="Card CardPad" style="background: rgba(0,0,0,0.02);">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
+
+            <div style="flex: 1;">
+              <div class="PostMeta" style="margin-top:0;">
+                <strong><%= comment.user.username %></strong> comentó en
+                <%= link_to comment.post.title, post_path(comment.post) %>
+                <span>• <%= time_ago_in_words(comment.created_at) %> ago</span>
+              </div>
+
+              <div class="Prose" style="font-size: 15px; margin-top:8px; padding-left: 10px; border-left: 3px solid var(--border2);">
+                <%= simple_format(truncate(comment.body, length: 300)) %>
+              </div>
+
+              <div style="margin-top:8px;">
+                <%= link_to "Ver contexto", post_path(comment.post), class: "btn btn-ghost btn-small", style: "font-size:12px;" %>
+              </div>
+            </div>
+
+            <div style="flex-shrink: 0;">
+               <%= button_to "Unsave", api_v1_comment_save_path(comment), method: :delete, class: "btn btn-danger btn-small" %>
+            </div>
+          </div>
+        </article>
+      <% end %>
+    </div>
+  <% else %>
+    <div class="Card CardPad Empty">No has guardado ningún comentario.</div>
+  <% end %>
+
+</div>

@@ -101,6 +101,13 @@
           <div class="PostFooter">
             <div></div>
             <div class="Pills">
+              <% if user_signed_in? %>
+                <% if current_user.saved_posts.exists?(post.id) %>
+                  <%= button_to "Unsave", api_v1_post_save_path(post), method: :delete, class: "btn btn-ghost" %>
+                <% else %>
+                  <%= button_to "Save", api_v1_post_save_path(post), method: :post, class: "btn btn-ghost" %>
+                <% end %>
+              <% end %>
               <%= link_to "Go To Post", post_path(post), class: "btn btn-ghost" %>
               <% if post.url.present? %>
                 <%= link_to "Open link", post.url, target: "_blank", rel: "noopener", class: "btn btn-ghost" %>

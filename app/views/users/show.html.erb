@@ -65,6 +65,9 @@
   <div class="Tabs">
     <%= link_to "Posts", user_path(@user, tab: "posts"), class: "Tab #{'is-active' if active_tab == 'posts'}" %>
     <%= link_to "Comments", user_path(@user, tab: "comments"), class: "Tab #{'is-active' if active_tab == 'comments'}" %>
+    <% if user_signed_in? && current_user == @user %>
+      <%= link_to "Saved", saved_user_path(@user), class: "Tab" %>
+    <% end %>
   </div>
 </div>
 
