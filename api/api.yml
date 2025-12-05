@@ -95,21 +95,13 @@ components:
       type: object
       required: [votable_type, votable_id, upvoted, downvoted, vote_value, score]
       properties:
-        votable_type:
-          type: string
-          enum: [Post, Comment]
-        votable_id:
-          type: integer
-        upvoted:
-          type: boolean
-        downvoted:
-          type: boolean
-        vote_value:
-          type: integer
-          enum: [-1, 0, 1]
-        score:
-          type: integer
-
+        id: { type: integer }
+        post_id: { type: integer, nullable: true }
+        comment_id: { type: integer, nullable: true }
+        value: { type: integer, enum: [1, -1] }
+        score: { type: integer }
+security:
+  - apiKeyAuth: []
 paths:
   /api/v1/users:
     get:
@@ -828,32 +820,60 @@ paths:
           description: Forbidden
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "404":
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-
-  /api/v1/votes:
+              schema: { $ref: "#/components/schemas/Error" }
+  /api/v1/posts/{post_id}/vote:
     post:
-      tags: [Votes]
-      summary: Vote (toggle)
+      summary: Create vote on post
+      description: Creates a new vote (1 or -1) if no previous vote exists for this user.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          schema: { type: integer }
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
-              required: [type, id, value]
+              required: [value]
               properties:
-                type:
-                  type: string
-                  enum: [Post, Comment]
-                id:
+                value:
                   type: integer
+                  enum: [1, -1]
+                  description: "1 for Upvote, -1 for Downvote"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VoteResponse" }
+        "409":
+          description: Conflict (User has already voted, use PUT to update)
+        "404":
+          description: Post not found
+        "422":
+          description: Unprocessable Entity
+    put:
+      summary: Update vote on post
+      description: Updates an existing vote (e.g., changing from +1 to -1).
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
                 value:
                   type: integer
                   enum: [1, -1]
@@ -862,17 +882,104 @@ paths:
           description: OK
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/VoteResponse"
-        "400":
-          description: Bad request
+              schema: { $ref: "#/components/schemas/VoteResponse" }
+        "404":
+          description: Vote not found (use POST to create first)
+        "422":
+          description: Unprocessable Entity
+    delete:
+      summary: Delete vote on post
+      description: Removes the user's vote from the post.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Vote not found
+  /api/v1/comments/{comment_id}/vote:
+    post:
+      summary: Create vote on comment
+      description: Creates a new vote (1 or -1) on a comment if no previous vote exists.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: comment_id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value:
+                  type: integer
+                  enum: [1, -1]
+                  description: "1 for Upvote, -1 for Downvote"
+      responses:
+        "201":
+          description: Created
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-        "401":
-          description: Not authorized
+              schema: { $ref: "#/components/schemas/VoteResponse" }
+        "409":
+          description: Conflict (User has already voted on this comment)
+        "404":
+          description: Comment not found
+        "422":
+          description: Unprocessable Entity
+    put:
+      summary: Update vote on comment
+      description: Updates an existing vote on a comment.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: comment_id
+          required: true
+          schema: { type: integer }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [value]
+              properties:
+                value:
+                  type: integer
+                  enum: [1, -1]
+      responses:
+        "200":
+          description: OK
           content:
             application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
+              schema: { $ref: "#/components/schemas/VoteResponse" }
+        "404":
+          description: Vote not found
+        "422":
+          description: Unprocessable Entity
+    delete:
+      summary: Delete vote on comment
+      description: Removes the user's vote from the comment.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: comment_id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: No Content
+        "404":
+          description: Vote not found
