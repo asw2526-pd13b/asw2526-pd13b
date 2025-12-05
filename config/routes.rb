@@ -23,9 +23,12 @@ Rails.application.routes.draw do
       end
       resources :posts do
         resources :comments, only: [:index, :create]
+        resource :vote, only: [:create, :update, :destroy], controller: 'post_votes'
       end
-      resources :comments, only: [:destroy]
-      resources :votes, only: [:create]
+      resources :comments, only: [:destroy] do
+        resource :vote, only: [:create, :update, :destroy], controller: 'comment_votes'
+      end
+      #resources :votes, only: [:create]
     end
   end
 
