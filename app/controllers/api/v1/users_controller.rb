@@ -29,6 +29,19 @@ module Api
         end
       end
 
+      def saved
+        user = User.find(params[:id])
+
+        if current_user != user
+          return render json: { error: 'Forbidden. You cannot view saved items of others.' }, status: :forbidden
+        end
+
+        render json: {
+          posts: user.saved_posts,
+          comments: user.saved_comments
+        }
+      end
+
       private
 
       def user_params

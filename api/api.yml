@@ -93,15 +93,15 @@ components:
 
     VoteResponse:
       type: object
-      required: [votable_type, votable_id, upvoted, downvoted, vote_value, score]
+      required: [id, value, score]
       properties:
         id: { type: integer }
         post_id: { type: integer, nullable: true }
         comment_id: { type: integer, nullable: true }
-        value: { type: integer, enum: [1, -1] }
+        value:
+          type: integer
+          enum: [1, -1]
         score: { type: integer }
-security:
-  - apiKeyAuth: []
 paths:
   /api/v1/users:
     get:
@@ -213,6 +213,36 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /api/v1/users/{id}/saved:
+    get:
+      tags: [Users]
+      summary: List saved items
+      description: Returns a list of saved posts and comments. Visible only to the owner of the account.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  posts:
+                    type: array
+                    items: { $ref: "#/components/schemas/Post" }
+                  comments:
+                    type: array
+                    items: { $ref: "#/components/schemas/Comment" }
+        "403":
+          description: Forbidden (You cannot view saved items of another user)
+        "404":
+          description: User not found
 
   /api/v1/communities:
     get:
@@ -714,6 +744,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Error"
+  /api/v1/posts/{post_id}/save:
+    post:
+      tags: [Posts]
+      summary: Save post
+      description: Adds the post to the authenticated user's saved list.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          schema: { type: integer }
+      responses:
+        "201":
+          description: Created (Post saved)
+        "409":
+          description: Conflict (Post already saved)
+        "404":
+          description: Post not found
+    delete:
+      tags: [Posts]
+      summary: Unsave post
+      description: Removes the post from the authenticated user's saved list.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: post_id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: No Content (Post removed from saved)
+        "404":
+          description: Not found (Post was not saved)
 
   /api/v1/posts/{post_id}/comments:
     get:
@@ -821,8 +886,44 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
+  /api/v1/comments/{comment_id}/save:
+    post:
+      tags: [Comments]
+      summary: Save comment
+      description: Adds the comment to the authenticated user's saved list.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: comment_id
+          required: true
+          schema: { type: integer }
+      responses:
+        "201":
+          description: Created (Comment saved)
+        "409":
+          description: Conflict (Comment already saved)
+        "404":
+          description: Comment not found
+    delete:
+      tags: [Comments]
+      summary: Unsave comment
+      description: Removes the comment from the authenticated user's saved list.
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: comment_id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: No Content (Comment removed from saved)
+        "404":
+          description: Not found (Comment was not saved)
   /api/v1/posts/{post_id}/vote:
     post:
+      tags: [Votes]
       summary: Create vote on post
       description: Creates a new vote (1 or -1) if no previous vote exists for this user.
       security:
@@ -857,6 +958,7 @@ paths:
         "422":
           description: Unprocessable Entity
     put:
+      tags: [Votes]
       summary: Update vote on post
       description: Updates an existing vote (e.g., changing from +1 to -1).
       security:
@@ -888,6 +990,7 @@ paths:
         "422":
           description: Unprocessable Entity
     delete:
+      tags: [Votes]
       summary: Delete vote on post
       description: Removes the user's vote from the post.
       security:
@@ -904,6 +1007,7 @@ paths:
           description: Vote not found
   /api/v1/comments/{comment_id}/vote:
     post:
+      tags: [Votes]
       summary: Create vote on comment
       description: Creates a new vote (1 or -1) on a comment if no previous vote exists.
       security:
@@ -938,6 +1042,7 @@ paths:
         "422":
           description: Unprocessable Entity
     put:
+      tags: [Votes]
       summary: Update vote on comment
       description: Updates an existing vote on a comment.
       security:
@@ -969,6 +1074,7 @@ paths:
         "422":
           description: Unprocessable Entity
     delete:
+      tags: [Votes]
       summary: Delete vote on comment
       description: Removes the user's vote from the comment.
       security:

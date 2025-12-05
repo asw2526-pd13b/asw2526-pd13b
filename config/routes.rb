@@ -16,7 +16,9 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
-      resources :users, only: [:index, :show, :update]
+      resources :users, only: [:index, :show, :update] do
+        get :saved, on: :member
+      end
       resources :communities do
         post :subscribe, on: :member
         delete :unsubscribe, on: :member
@@ -24,9 +26,11 @@ Rails.application.routes.draw do
       resources :posts do
         resources :comments, only: [:index, :create]
         resource :vote, only: [:create, :update, :destroy], controller: 'post_votes'
+        resource :save, only: [:create, :destroy], controller: 'post_saves'
       end
       resources :comments, only: [:destroy] do
         resource :vote, only: [:create, :update, :destroy], controller: 'comment_votes'
+        resource :save, only: [:create, :destroy], controller: 'comment_saves'
       end
       #resources :votes, only: [:create]
     end
@@ -40,6 +44,7 @@ Rails.application.routes.draw do
   resources :users, only: [:index, :show, :edit, :update] do
     member do
       post :regenerate_api_key
+      get :saved
     end
   end
 

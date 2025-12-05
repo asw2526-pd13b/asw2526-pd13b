@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_12_03_103416) do
+ActiveRecord::Schema[8.0].define(version: 2025_12_05_015951) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.string "name", null: false
     t.string "record_type", null: false
@@ -69,6 +69,17 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_03_103416) do
     t.index ["user_id"], name: "index_posts_on_user_id"
   end
 
+  create_table "saves", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.string "saveable_type", null: false
+    t.integer "saveable_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["saveable_type", "saveable_id"], name: "index_saves_on_saveable"
+    t.index ["user_id", "saveable_type", "saveable_id"], name: "index_saves_on_user_id_and_saveable_type_and_saveable_id", unique: true
+    t.index ["user_id"], name: "index_saves_on_user_id"
+  end
+
   create_table "subscriptions", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "community_id", null: false
@@ -118,6 +129,7 @@ ActiveRecord::Schema[8.0].define(version: 2025_12_03_103416) do
   add_foreign_key "comments", "users"
   add_foreign_key "posts", "communities"
   add_foreign_key "posts", "users"
+  add_foreign_key "saves", "users"
   add_foreign_key "subscriptions", "communities"
   add_foreign_key "subscriptions", "users"
   add_foreign_key "votes", "users"

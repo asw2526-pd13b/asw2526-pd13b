@@ -9,6 +9,9 @@ class User < ApplicationRecord
   has_many :subscriptions, dependent: :destroy
   has_many :subscribed_communities, through: :subscriptions, source: :community
   has_many :votes, dependent: :destroy
+  has_many :saves, class_name: 'Save', foreign_key: 'user_id', dependent: :destroy
+  has_many :saved_posts, through: :saves, source: :saveable, source_type: 'Post'
+  has_many :saved_comments, through: :saves, source: :saveable, source_type: 'Comment'
 
   validates :username, presence: true, uniqueness: true
   validates :email, presence: true, uniqueness: true

@@ -34,6 +34,20 @@ class UsersController < ApplicationController
     redirect_to @user, notice: "API Key regenerada correctament."
   end
 
+  def saved
+    @user = User.find(params[:id])
+
+    unless current_user == @user
+      redirect_to user_path(current_user), alert: "No puedes ver los guardados de otros."
+      return
+    end
+
+    @active_tab = "saved"
+
+    @saved_posts = @user.saved_posts.includes(:community, :user, :image_attachment).order(created_at: :desc)
+    @saved_comments = @user.saved_comments.includes(:post, :user).order(created_at: :desc)
+  end
+
   private
 
   def set_user
