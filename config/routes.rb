@@ -22,9 +22,19 @@ Rails.application.routes.draw do
         delete :unsubscribe, on: :member
       end
       resources :posts do
+        member do
+          post 'save', to: 'posts#save'
+          delete 'save', to: 'posts#unsave'
+        end
         resources :comments, only: [:index, :create]
       end
-      resources :comments, only: [:destroy]
+      resources :comments, only: [:index, :destroy] do
+        member do
+          post 'save', to: 'comments#save'
+          delete 'save', to: 'comments#unsave'
+        end
+      end
+
       resources :votes, only: [:create]
     end
   end
