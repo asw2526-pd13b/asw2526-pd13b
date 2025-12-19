@@ -41,10 +41,20 @@ Rails.application.routes.draw do
   end
 
   resources :posts do
-    resources :comments, only: [:create]  # crear comentario asociado a post
-  end
+      member do
+        post 'save', to: 'posts#save'
+        delete 'save', to: 'posts#unsave'
+      end
 
-  resources :comments, only: [:destroy]
+      resources :comments, only: [:index, :create]
+    end
+
+  resources :comments, only: [:index, :destroy] do
+      member do
+        post 'save', to: 'comments#save'
+        delete 'save', to: 'comments#unsave'
+      end
+    end
 
   get "up" => "rails/health#show", as: :rails_health_check
 

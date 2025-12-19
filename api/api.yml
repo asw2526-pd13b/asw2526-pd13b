@@ -353,6 +353,22 @@ paths:
                 properties:
                   subscribed: { type: boolean }
                   community: { $ref: "#/components/schemas/Community" }
+  /api/v1/comments:
+    get:
+      summary: Get global comments feed
+      security:
+        - apiKeyAuth: []
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  comments:
+                    type: array
+                    items: { $ref: "#/components/schemas/Comment" }
   /api/v1/posts:
     get:
       summary: List posts
@@ -520,6 +536,47 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }
+  /api/v1/posts/{id}/save:
+    post:
+      summary: Save a post
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Post saved successfully
+          content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   success: { type: boolean }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    delete:
+      summary: Unsave a post
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Post unsaved successfully
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
   /api/v1/posts/{post_id}/comments:
     get:
       summary: List comments for a post
@@ -591,6 +648,47 @@ paths:
         "204": { description: No content }
         "403":
           description: Forbidden
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+  /api/v1/comments/{id}/save:
+    post:
+      summary: Save a comment
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "200":
+          description: Comment saved successfully
+          content:
+             application/json:
+               schema:
+                 type: object
+                 properties:
+                   success: { type: boolean }
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+    delete:
+      summary: Unsave a comment
+      security:
+        - apiKeyAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: integer }
+      responses:
+        "204":
+          description: Comment unsaved successfully
+        "404":
+          description: Not found
           content:
             application/json:
               schema: { $ref: "#/components/schemas/Error" }

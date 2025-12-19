@@ -10,6 +10,9 @@ class User < ApplicationRecord
   has_many :subscribed_communities, through: :subscriptions, source: :community
   has_many :votes, dependent: :destroy
 
+  has_many :saved_posts, dependent: :destroy
+  has_many :saved_comments, dependent: :destroy
+
   validates :username, presence: true, uniqueness: true
   validates :email, presence: true, uniqueness: true
 
